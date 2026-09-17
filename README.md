@@ -24,6 +24,29 @@ Fluxo principal:
 - Whitelabel obrigatório, seguindo o padrão visual e de parametrização do 7Commander.
 - Produto independente da MetLife. A primeira operação pode usar produtos MetLife, mas seguradora, produtos e identidade do cliente não devem ser hardcoded.
 
+## Estratégia de branches e validação
+
+O fluxo oficial do projeto utiliza duas branches permanentes:
+
+- `develop`: branch de integração, homologação e validação humana. Toda implementação concluída deve chegar primeiro nesta branch e gerar um deploy de preview/homologação no Vercel para validação do responsável pelo produto.
+- `main`: branch estável. Somente código já validado em `develop` pode ser promovido para `main`.
+
+Regras:
+
+1. O desenvolvimento deve ocorrer em branches de feature derivadas de `develop`, por exemplo `feat/spec-01-foundation`.
+2. A feature deve ser integrada primeiro em `develop`.
+3. Cada atualização relevante de `develop` deve gerar deploy no Vercel para validação humana.
+4. A validação funcional e visual será feita sempre sobre o ambiente publicado a partir de `develop`.
+5. Correções encontradas durante a homologação permanecem em `develop` até aprovação.
+6. Somente após aprovação explícita o checkpoint pode ser promovido de `develop` para `main`.
+7. Não desenvolver diretamente em `main` e não usar `main` como ambiente de homologação.
+
+Fluxo esperado:
+
+`feat/* -> develop -> Vercel Preview/Homologação -> validação humana -> main`
+
+O projeto Vercel já existe e deve ser utilizado para publicar cada atualização necessária para validação em `develop`. A configuração de produção associada à `main` deve permanecer separada da homologação.
+
 ## Referência de frontend
 
 O projeto de referência é o 7Commander:
@@ -54,4 +77,4 @@ Documentos complementares:
 
 ## Sequência recomendada de desenvolvimento
 
-Implementar as SPECs em ordem. Cada SPEC deve gerar um checkpoint validável pelo usuário antes do início da próxima etapa.
+Implementar as SPECs em ordem. Cada SPEC deve gerar um checkpoint validável pelo usuário em `develop`, publicado no Vercel, antes do início da próxima etapa e antes de qualquer promoção para `main`.
