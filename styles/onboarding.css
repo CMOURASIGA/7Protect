@@ -5,3 +5,4 @@
 .onboarding-card label { display: grid; gap: 6px; color: var(--text-secondary); font-size: 13px; font-weight: 600; }
 .onboarding-card input { border: 1px solid var(--border); border-radius: 10px; padding: 10px; }
 .onboarding-card .button { justify-self: start; }
+.onboarding-error { margin: 0; border: 1px solid #f09595; border-radius: 10px; background: #fcebeb; padding: 10px 12px; color: #a32d2d !important; font-size: 13px !important; font-weight: 600; }
