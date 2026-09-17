@@ -1,0 +1,4 @@
+"use client";
+import { useState } from "react"; import { usePathname } from "next/navigation"; import { Sidebar } from "./sidebar"; import { Onboarding } from "@/components/onboarding";
+const titles: Record<string, string> = { "/": "Dashboard", "/kanban": "Kanban", "/leads": "Leads", "/clientes": "Clientes", "/configuracoes": "Configurações", "/backup": "Backup e Dados" };
+export function AppShell({ children }: { children: React.ReactNode }) { const [open, setOpen] = useState(false); const path = usePathname(); return <div className="app-shell"><Sidebar open={open} close={() => setOpen(false)} /><section className="workspace"><header><button className="menu" onClick={() => setOpen(true)} aria-label="Abrir menu">☰</button><div><p>WORKSPACE LOCAL</p><h1>{titles[path] ?? "7Protect"}</h1></div><span className="local-badge">● Dados neste dispositivo</span></header><main>{children}</main></section><Onboarding /></div>; }
