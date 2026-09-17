@@ -1,0 +1,7 @@
+.onboarding-overlay { position: fixed; z-index: 70; inset: 0; display: grid; place-items: center; padding: 16px; background: #102d4dcc; }
+.onboarding-card { display: grid; gap: 14px; width: min(100%, 480px); padding: 28px; border: 1px solid var(--border); border-radius: 24px; background: #fff; box-shadow: var(--shadow); }
+.onboarding-card h2 { margin: 0; font-size: 24px; }
+.onboarding-card p:not(.eyebrow) { margin: 0; color: var(--text-secondary); font-size: 14px; line-height: 1.55; }
+.onboarding-card label { display: grid; gap: 6px; color: var(--text-secondary); font-size: 13px; font-weight: 600; }
+.onboarding-card input { border: 1px solid var(--border); border-radius: 10px; padding: 10px; }
+.onboarding-card .button { justify-self: start; }
