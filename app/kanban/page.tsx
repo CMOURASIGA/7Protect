@@ -1,1 +1,1 @@
-import { Placeholder } from "@/components/page-content"; export default function Page() { return <Placeholder title="Kanban" />; }
+import { KanbanWorkspace } from "@/components/crm-workspace"; export default function Page() { return <KanbanWorkspace />; }

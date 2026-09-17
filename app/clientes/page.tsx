@@ -1,1 +1,1 @@
-import { Placeholder } from "@/components/page-content"; export default function Page() { return <Placeholder title="Clientes" />; }
+import { ClientsWorkspace } from "@/components/crm-workspace"; export default function Page() { return <ClientsWorkspace />; }
