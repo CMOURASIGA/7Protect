@@ -114,6 +114,8 @@ Saídas previstas:
 
 O relatório não deve ser um arquivo editado manualmente dentro do sistema. Deve ser uma renderização de dados e templates versionados.
 
+O PDF do diagnóstico é um documento de levantamento e revisão. Ele é diferente do PDF comercial da proposta final, que deverá apresentar a solução recomendada sem substituir ou alterar o histórico do diagnóstico.
+
 ### 3.7 Carteira e acompanhamento
 
 Após o fechamento, o cliente passa a compor a carteira da corretora.

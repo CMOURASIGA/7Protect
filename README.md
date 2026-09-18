@@ -12,6 +12,10 @@ Fluxo principal:
 
 `Lead -> Cliente -> Diagnóstico -> Tarefa -> Planejamento -> Proposta -> Apresentação -> Fechamento -> Acompanhamento`
 
+## Documentos do atendimento
+
+O PDF do diagnóstico registra o levantamento e a revisão das informações declaradas pelo cliente. Ele não substitui o PDF comercial da proposta final, que apresentará a solução recomendada em etapa própria.
+
 ## Diretrizes do produto
 
 - MVP local-first, sem dependência de Supabase.

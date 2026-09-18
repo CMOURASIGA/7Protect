@@ -196,6 +196,15 @@ Cards devem mostrar apenas informação operacional útil:
 
 O drag-and-drop deve atualizar histórico e indicadores.
 
+## 9.1 PDF do diagnóstico
+
+O diagnóstico deve possuir uma visualização consolidada e gerar dois documentos sob demanda no dispositivo:
+
+- PDF para o cliente, com dados declarados apropriados para compartilhamento;
+- PDF completo interno, que pode incluir análise profissional e notas internas.
+
+Esses documentos não substituem o PDF comercial da proposta final. A marca da corretora configurada no whitelabel deve ser aplicada ao cabeçalho e aos dados institucionais.
+
 ## 10. Aegis
 
 Aegis deve aparecer como parte do contexto do cliente, não como chatbot genérico isolado.
