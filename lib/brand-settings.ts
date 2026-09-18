@@ -15,22 +15,32 @@ export type ClientBrandSettings = {
 };
 
 export const DEFAULT_CLIENT_BRAND: ClientBrandSettings = {
-  clientName: "",
-  logoUrl: "",
-  primaryColor: "#173f6b",
-  highlightColor: "#4fc3a1",
+  clientName: "Consult Services Tecnologia",
+  logoUrl: "https://i.imgur.com/gxXnYsA.png",
+  primaryColor: "#003B73",
+  highlightColor: "#00AEEF",
   phone: "",
   email: "",
   address: "",
 };
 
+const EMPTY_CLIENT_BRAND: ClientBrandSettings = {
+  ...DEFAULT_CLIENT_BRAND,
+  clientName: "",
+  logoUrl: "",
+};
+
 export function toClientBrandSettings(settings: BrandSettings | null | undefined): ClientBrandSettings {
   return {
-    ...DEFAULT_CLIENT_BRAND,
+    ...EMPTY_CLIENT_BRAND,
     ...settings,
     logoUrl: settings?.logoUrl ?? "",
     address: settings?.address ?? "",
   };
+}
+
+export function getClientLogoUrl(settings: { logoUrl?: string } | null | undefined) {
+  return settings?.logoUrl || DEFAULT_CLIENT_BRAND.logoUrl;
 }
 
 export function applyClientBrandSettings(settings: ClientBrandSettings) {

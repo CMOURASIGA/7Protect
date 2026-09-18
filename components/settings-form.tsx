@@ -1,9 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { setupFoundation } from "@/application/foundation-service";
 import { useFoundation } from "@/components/foundation-provider";
-import { toClientBrandSettings, type ClientBrandSettings } from "@/lib/brand-settings";
+import { getClientLogoUrl, toClientBrandSettings, type ClientBrandSettings } from "@/lib/brand-settings";
+
+const MAX_LOGO_SIZE_BYTES = 2 * 1024 * 1024;
+const ACCEPTED_LOGO_TYPES = ["image/png", "image/jpeg", "image/webp"];
 
 export function SettingsForm() {
   const { settings, refresh } = useFoundation();
@@ -16,11 +19,35 @@ function SettingsFormFields({ initialForm, refresh }: { initialForm: ClientBrand
   const [saved, setSaved] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const fileInput = useRef<HTMLInputElement>(null);
 
   const update = (key: keyof ClientBrandSettings, value: string) => {
     setForm((current) => ({ ...current, [key]: value }));
     setSaved(false);
     setError(null);
+  };
+
+  const selectLogo = (file: File | undefined) => {
+    if (!file) return;
+    setSaved(false);
+    if (!ACCEPTED_LOGO_TYPES.includes(file.type)) {
+      setError("Use uma imagem PNG, JPG ou WebP para a logo.");
+      return;
+    }
+    if (file.size > MAX_LOGO_SIZE_BYTES) {
+      setError("A logo deve ter no máximo 2 MB.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => update("logoUrl", String(reader.result));
+    reader.onerror = () => setError("Não foi possível ler este arquivo. Tente outra imagem.");
+    reader.readAsDataURL(file);
+  };
+
+  const removeLogo = () => {
+    update("logoUrl", "");
+    if (fileInput.current) fileInput.current.value = "";
   };
 
   const submit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -54,10 +81,16 @@ function SettingsFormFields({ initialForm, refresh }: { initialForm: ClientBrand
           Nome da corretora
           <input value={form.clientName} onChange={(event) => update("clientName", event.target.value)} required />
         </label>
-        <label>
-          URL da logo
-          <input value={form.logoUrl} onChange={(event) => update("logoUrl", event.target.value)} placeholder="https://..." type="url" />
-        </label>
+        <div className="logo-upload">
+          <span className="logo-upload-label">Logo da corretora</span>
+          <div className="logo-upload-preview"><img src={getClientLogoUrl(form)} alt="Prévia da logo" /></div>
+          <div className="logo-upload-actions">
+            <input ref={fileInput} className="visually-hidden" id="client-logo" type="file" accept="image/png,image/jpeg,image/webp" onChange={(event) => selectLogo(event.target.files?.[0])} />
+            <label className="button secondary" htmlFor="client-logo">Enviar logo</label>
+            {form.logoUrl ? <button type="button" className="button secondary" onClick={removeLogo}>Usar logo padrão</button> : null}
+          </div>
+          <p>PNG, JPG ou WebP, com até 2 MB. Sem uma logo enviada, será exibida a marca padrão da Consult Services.</p>
+        </div>
         <div className="two">
           <label>
             Cor principal
