@@ -22,6 +22,14 @@ O dashboard da corretora consolida CRM, Kanban, planejamentos, propostas e fecha
 
 A apresentação web e o PDF comercial são gerados a partir de uma versão específica da proposta. Na primeira geração é criado um `reportSnapshot` local, com versão de template e origem explícita dos dados (`clientProvided`, `systemCalculated`, `brokerAnalysis` e `templateStatic`). O snapshot não é regravado: alterações posteriores no cadastro não mudam um relatório histórico.
 
+## Aegis, assistente de IA
+
+A Aegis é uma assistente contextual para o corretor. Ela analisa diagnósticos, revisa versões de propostas e prepara perguntas objetivas para reuniões, sempre como apoio à revisão profissional.
+
+O fluxo preserva a separação arquitetural: `UI -> AegisApplicationService -> PayloadSanitizer -> AI Provider -> OpenAI -> Schema Validator -> AegisRepository`. O provider `fake` é usado por padrão em desenvolvimento e homologação. O provider `openai` utiliza exclusivamente o Route Handler server-side e só é ativado com `NEXT_PUBLIC_AEGIS_PROVIDER=openai` e `OPENAI_API_KEY` configurada no ambiente hospedado.
+
+Antes da chamada, o payload remove nome, CPF, telefone, e-mail, endereço, apólice e IDs internos. O IndexedDB registra somente metadados, fingerprint do contexto e resultado estruturado validado. Nenhum dado do CRM, diagnóstico ou proposta é alterado pela Aegis.
+
 ## Diretrizes do produto
 
 - MVP local-first, sem dependência de Supabase.
