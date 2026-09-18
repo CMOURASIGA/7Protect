@@ -1,3 +1,3 @@
 import type { Metadata } from "next"; import "./globals.css"; import { FoundationProvider } from "@/components/foundation-provider"; import { AppShell } from "@/components/layout/app-shell";
-export const metadata: Metadata = { title: "7Protect", description: "Gestão de proteção financeira" };
+export const metadata: Metadata = { title: "7Protect", description: "O 7Protect é uma plataforma CRM para corretores de seguros, voltada ao diagnóstico, planejamento e gestão da proteção financeira dos clientes." };
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) { return <html lang="pt-BR"><body><FoundationProvider><AppShell>{children}</AppShell></FoundationProvider></body></html>; }
