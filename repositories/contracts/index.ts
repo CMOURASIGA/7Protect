@@ -1,10 +1,2 @@
-import type { Tenant, BrandSettings, Lead, Client, Task, Diagnostic, PipelineHistory } from "@/domains/core/entities";
-import type { Repository } from "./repository";
-export type TenantRepository = Repository<Tenant>;
-export type SettingsRepository = Repository<BrandSettings>;
-export type LeadRepository = Repository<Lead>;
-export type ClientRepository = Repository<Client>;
-export type TaskRepository = Repository<Task>;
-export type DiagnosticRepository = Repository<Diagnostic>;
-export type PipelineHistoryRepository = Repository<PipelineHistory>;
-
+import type { Tenant, BrandSettings, Lead, Client, Task, Diagnostic, PlanningCycle, BrokerAnalysis, Insurer, InsuranceProduct, CoverageType, ProposalVersion, Coverage, ClosingRecord, PipelineHistory } from "@/domains/core/entities"; import type { Repository } from "./repository";
+export type TenantRepository = Repository<Tenant>; export type SettingsRepository = Repository<BrandSettings>; export type LeadRepository = Repository<Lead>; export type ClientRepository = Repository<Client>; export type TaskRepository = Repository<Task>; export type DiagnosticRepository = Repository<Diagnostic>; export type PlanningCycleRepository = Repository<PlanningCycle>; export type BrokerAnalysisRepository = Repository<BrokerAnalysis>; export type InsurerRepository = Repository<Insurer>; export type InsuranceProductRepository = Repository<InsuranceProduct>; export type CoverageTypeRepository = Repository<CoverageType>; export type ProposalVersionRepository = Repository<ProposalVersion>; export type CoverageRepository = Repository<Coverage>; export type ClosingRepository = Repository<ClosingRecord>; export type PipelineHistoryRepository = Repository<PipelineHistory>;
