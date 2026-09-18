@@ -16,6 +16,12 @@ Fluxo principal:
 
 O PDF do diagnóstico registra o levantamento e a revisão das informações declaradas pelo cliente. Ele não substitui o PDF comercial da proposta final, que apresentará a solução recomendada em etapa própria.
 
+## Dashboards e apresentação comercial
+
+O dashboard da corretora consolida CRM, Kanban, planejamentos, propostas e fechamentos já persistidos no dispositivo. Seus filtros operacionais levam ao Kanban correspondente, e o dashboard individual reúne a fotografia financeira declarada, a proposta selecionada e o histórico do cliente.
+
+A apresentação web e o PDF comercial são gerados a partir de uma versão específica da proposta. Na primeira geração é criado um `reportSnapshot` local, com versão de template e origem explícita dos dados (`clientProvided`, `systemCalculated`, `brokerAnalysis` e `templateStatic`). O snapshot não é regravado: alterações posteriores no cadastro não mudam um relatório histórico.
+
 ## Diretrizes do produto
 
 - MVP local-first, sem dependência de Supabase.
