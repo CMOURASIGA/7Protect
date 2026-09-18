@@ -37,8 +37,10 @@ O 7Commander já separa marca do produto e marca do cliente. O 7Protect deve seg
 ### Marca do produto
 
 - `7Protect`
-- subtítulo sugerido: `Gestão de proteção financeira`
+- subtítulo: `CRM e Planejamento de Proteção Financeira`
 - assistente: `Aegis`
+
+Descrição institucional: **O 7Protect é uma plataforma CRM para corretores de seguros, voltada ao diagnóstico, planejamento e gestão da proteção financeira dos clientes.**
 
 ### Marca da corretora
 

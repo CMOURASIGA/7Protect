@@ -15,7 +15,11 @@ Há duplicidade de digitação, baixa rastreabilidade, ausência de histórico e
 
 ## 2. Proposta do 7Protect
 
-O 7Protect será um CRM vertical para corretoras de seguros e consultoria de proteção financeira.
+O 7Protect é uma plataforma CRM para corretores de seguros, voltada ao diagnóstico, planejamento e gestão da proteção financeira dos clientes.
+
+Seu posicionamento é **CRM e Planejamento de Proteção Financeira**. Ele reúne a gestão comercial do corretor, com leads, clientes, Kanban, funil, conversão e carteira, e o planejamento da proteção financeira do cliente, com diagnóstico, objetivos, necessidades, propostas, coberturas e acompanhamento.
+
+O produto é independente de seguradora e não deve ser apresentado como gestor ou plataforma de investimentos. Uma seguradora pode ser usada como referência operacional inicial, sem restringir marca, produtos ou linguagem da plataforma.
 
 O produto organiza todo o ciclo de atendimento:
 

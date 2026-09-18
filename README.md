@@ -1,6 +1,8 @@
 # 7Protect
 
-CRM especializado para corretoras de seguros e consultoria de proteção financeira, integrante do HUB da Consult Services.
+**CRM e Planejamento de Proteção Financeira**
+
+O 7Protect é uma plataforma CRM para corretores de seguros, voltada ao diagnóstico, planejamento e gestão da proteção financeira dos clientes.
 
 ## Propósito
 
@@ -23,6 +25,7 @@ Fluxo principal:
 - IA Aegis, usando OpenAI, como assistente do corretor para análise de diagnóstico e revisão de proposta.
 - Whitelabel obrigatório, seguindo o padrão visual e de parametrização do 7Commander.
 - Produto independente da MetLife. A primeira operação pode usar produtos MetLife, mas seguradora, produtos e identidade do cliente não devem ser hardcoded.
+- O produto não é gestor ou plataforma de investimentos. Produtos de seguradoras são referências operacionais possíveis, nunca uma limitação da plataforma.
 
 ## Estratégia de branches e validação
 
