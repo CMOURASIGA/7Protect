@@ -22,4 +22,13 @@ export type ClosingRecord = EntityMetadata & { clientId: string; planningCycleId
 export type Plan = EntityMetadata & { clientId: string; name: string; status: "draft" | "active" };
 export type PipelineHistory = EntityMetadata & { leadId?: string; clientId?: string; fromStage?: PipelineStage; toStage: PipelineStage; changedAt: string; reason?: string; eventType?: "created" | "moved" | "converted" | "diagnostic_completed" | "proposal_presented" | "closed" };
 export type AiAnalysis = EntityMetadata & { clientId: string; status: "pending" | "complete"; content?: string };
-export type ReportSnapshot = EntityMetadata & { clientId: string; type: string; payload: Record<string, unknown> };
+export type ReportDataOrigin = "clientProvided" | "systemCalculated" | "brokerAnalysis" | "templateStatic";
+export type ReportSnapshot = EntityMetadata & {
+  clientId: string;
+  planningCycleId: string;
+  proposalVersionId: string;
+  type: "commercial_proposal";
+  generatedAt: string;
+  templateVersion: string;
+  payload: Record<string, unknown>;
+};
