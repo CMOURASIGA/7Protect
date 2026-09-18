@@ -31,7 +31,7 @@ async function currentContext(clientId: string, analysisType: AegisAnalysisType,
   const diagnostic = diagnostics.find((item) => item.planningCycleId === cycle.id);
   if (!diagnostic) throw new Error("O planejamento ainda não possui diagnóstico.");
   const brokerAnalysis = analyses.find((item) => item.planningCycleId === cycle.id) ?? null;
-  const candidate = proposalVersionId ? proposals.find((item) => item.id === proposalVersionId) : proposals.filter((item) => item.planningCycleId === cycle.id).sort((a, b) => b.number - a.number)[0];
+  const candidate = analysisType === "proposal_review" ? (proposalVersionId ? proposals.find((item) => item.id === proposalVersionId) : proposals.filter((item) => item.planningCycleId === cycle.id).sort((a, b) => b.number - a.number)[0]) : undefined;
   if (analysisType === "proposal_review" && !candidate) throw new Error("Crie uma proposta antes de solicitar a revisão da Aegis.");
   const context = sanitizeAegisPayload({ analysisType, diagnostic, birthDate: client.birthDate, brokerAnalysis, proposal: candidate, coverages: candidate ? coverages.filter((item) => item.proposalVersionId === candidate.id) : [] });
   return { tenantId, cycle, proposal: candidate, context };
