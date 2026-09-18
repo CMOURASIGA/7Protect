@@ -12,7 +12,7 @@ const number = (value: unknown) => Number(value) || 0;
 const draftData = { identification: "", family: "", workIncome: "", expenses: "", assets: "", reserves: "", pensions: "", debts: "", existingInsurance: "", health: "", goals: "", review: "", familyIncome: 0, monthlyExpense: 0 };
 
 export type CreatePlanningInput = { clientId: string; name: string; referenceDate: string; type: PlanningType; observation?: string };
-export async function listPlanningClients() { return provider().clients.list(await tenantId()); }
+export async function listPlanningClients() { const foundation = await getFoundation(); return foundation.tenant ? provider().clients.list(foundation.tenant.id) : []; }
 export async function listPlanningCycles(clientId: string) { const id = await tenantId(); return (await provider().planningCycles.list(id)).filter((planning) => planning.clientId === clientId).sort((a, b) => (b.referenceDate ?? b.startedAt).localeCompare(a.referenceDate ?? a.startedAt) || b.createdAt.localeCompare(a.createdAt)); }
 async function recordPlanningEvent(input: { clientId: string; planningCycleId: string; type: PlanningEventType; description: string; proposalVersionId?: string; occurredAt?: string }) {
   const id = await tenantId();
@@ -77,6 +77,7 @@ export async function closePlanning(cycle: PlanningCycle, proposal: ProposalVers
   const client = await p.clients.findById(cycle.clientId); if (client) { const card: PipelineCard = { id: client.id, kind: "client", name: client.name, stage: client.pipelineStage ?? "presented", updatedAt: client.updatedAt }; await movePipelineCard(card, "closed", "Proposta aceita no planejamento"); } return updatedCycle;
 }
 export async function ensurePlanningDemo() {
+  const foundation = await getFoundation(); if (!foundation.tenant) return null;
   await seedCatalog(); const clients = await listPlanningClients(); const client: Client | undefined = clients.find((item) => item.name === "Rafael Mendes") ?? clients[0]; if (!client) return null; const existing = await listPlanningCycles(client.id); if (existing.some((item) => item.name === "Planejamento familiar 2026")) return client.id;
   const cycle = await createPlanningCycle({ clientId: client.id, name: "Planejamento familiar 2026", type: "initial", referenceDate: "2026-09-18", observation: "Caso demonstrativo completo." }); const workspace = await planningWorkspace(client.id, cycle.id); if (!workspace.diagnostic) throw new Error("Diagnóstico demonstrativo não foi criado.");
   const diagnostic = await saveDiagnostic(workspace.diagnostic, { ...draftData, identification: "Rafael Mendes, 39 anos, casado, consultor.", family: "Cônjuge e dois filhos dependentes.", workIncome: "Renda principal e variável informadas pelo cliente.", expenses: "Despesas familiares recorrentes informadas.", assets: "Imóvel residencial e veículo.", reserves: "Reserva de emergência e investimentos declarados.", pensions: "Previdência complementar em avaliação.", debts: "Financiamento em curso.", existingInsurance: "Cobertura atual insuficiente para os objetivos declarados.", health: "Informações de saúde registrados para análise posterior.", goals: "Manutenção do padrão de vida, educação dos filhos e sucessão.", review: "Dados revisados com o cliente.", familyIncome: 24000, monthlyExpense: 14500 });
