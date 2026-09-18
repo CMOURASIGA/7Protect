@@ -8,14 +8,15 @@ import { STAGE_LABEL } from "@/application/crm-service";
 import type { PipelineStage } from "@/domains/core/entities";
 import { clientStatusLabel, proposalStatusLabel } from "@/lib/status-labels";
 import { AegisPanel } from "@/components/aegis-panel";
+import { useFoundation } from "@/components/foundation-provider";
 
 const money = (value: number) => value.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
 const date = (value?: string) => value ? new Intl.DateTimeFormat("pt-BR", { dateStyle: "medium" }).format(new Date(value)) : "Não informado";
 const typeLabel = { initial: "Inicial", review: "Revisão", replanning: "Replanejamento", simulation: "Simulação" };
 
 export function BrokerDashboardWorkspace() {
-  const [data, setData] = useState<BrokerDashboard | null>(null); const [months, setMonths] = useState(6); const [selected, setSelected] = useState<BrokerDashboard["metrics"][number] | null>(null); const [error, setError] = useState("");
-  useEffect(() => { void brokerDashboard(months).then(setData).catch((reason) => setError(reason instanceof Error ? reason.message : "Não foi possível carregar o dashboard.")); }, [months]);
+  const { ready, settings } = useFoundation(); const [data, setData] = useState<BrokerDashboard | null>(null); const [months, setMonths] = useState(6); const [selected, setSelected] = useState<BrokerDashboard["metrics"][number] | null>(null); const [error, setError] = useState("");
+  useEffect(() => { if (!ready || !settings) return; void brokerDashboard(months).then(setData).catch((reason) => setError(reason instanceof Error ? reason.message : "Não foi possível carregar o dashboard.")); }, [months, ready, settings]);
   if (error) return <div className="page"><section className="empty"><h2>Dashboard indisponível</h2><p>{error}</p></section></div>;
   return <div className="page reporting-page">
     <section className="hero"><div><p className="eyebrow">GESTÃO DA CORRETORA</p><h2>Visão comercial e de proteção financeira</h2><p>Indicadores calculados exclusivamente a partir do CRM, Kanban, planejamentos, propostas e fechamentos persistidos.</p></div><label className="period-select">Período<select value={months} onChange={(event) => setMonths(Number(event.target.value))}><option value={3}>Últimos 3 meses</option><option value={6}>Últimos 6 meses</option><option value={12}>Últimos 12 meses</option></select></label></section>
