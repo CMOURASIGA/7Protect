@@ -21,7 +21,28 @@ export type Coverage = EntityMetadata & { proposalVersionId: string; insurerId?:
 export type ClosingRecord = EntityMetadata & { clientId: string; planningCycleId: string; proposalVersionId: string; closedAt: string; suggestedReviewAt?: string };
 export type Plan = EntityMetadata & { clientId: string; name: string; status: "draft" | "active" };
 export type PipelineHistory = EntityMetadata & { leadId?: string; clientId?: string; fromStage?: PipelineStage; toStage: PipelineStage; changedAt: string; reason?: string; eventType?: "created" | "moved" | "converted" | "diagnostic_completed" | "proposal_presented" | "closed" };
-export type AiAnalysis = EntityMetadata & { clientId: string; status: "pending" | "complete"; content?: string };
+export type AegisAnalysisType = "diagnostic" | "proposal_review" | "meeting_questions";
+export type AegisStructuredResult = {
+  summary: string;
+  attentionPoints: string[];
+  protectionTopics: string[];
+  questions: string[];
+  missingInformation: string[];
+  proposalReview?: { alignedItems: string[]; reviewItems: string[] };
+  disclaimer: string;
+};
+export type AiAnalysis = EntityMetadata & {
+  clientId: string;
+  planningCycleId: string;
+  proposalVersionId?: string;
+  analysisType: AegisAnalysisType;
+  inputFingerprint: string;
+  provider: string;
+  model: string;
+  status: "complete" | "failed";
+  structuredResult?: AegisStructuredResult;
+  errorMessage?: string;
+};
 export type ReportDataOrigin = "clientProvided" | "systemCalculated" | "brokerAnalysis" | "templateStatic";
 export type ReportSnapshot = EntityMetadata & {
   clientId: string;

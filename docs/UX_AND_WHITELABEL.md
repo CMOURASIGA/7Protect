@@ -223,6 +223,8 @@ A resposta deve ser renderizada em blocos estruturados:
 - perguntas recomendadas;
 - revisão da proposta.
 
+O bloco deve informar que utiliza IA com dados minimizados e que o resultado exige revisão profissional da corretora. Em caso de indisponibilidade, deve mostrar erro recuperável, preservar a tela e permitir nova tentativa.
+
 ## 11. Responsividade
 
 Validar pelo menos:
