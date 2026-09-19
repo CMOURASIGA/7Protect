@@ -20,7 +20,7 @@ Orientações obrigatórias para desenvolvimento do 7Protect.
 12. Nova proposta cria nova versão. Nunca apagar versão apresentada ao cliente.
 13. Movimentações de Kanban devem gerar histórico.
 14. Dados declarados pelo cliente e análise do corretor devem ser campos/entidades diferentes.
-15. Aegis não pode alterar dados ou proposta sem confirmação explícita do corretor.
+15. Metis não pode alterar dados ou proposta sem confirmação explícita do corretor.
 16. Antes de enviar dados para IA, minimizar e remover identificadores desnecessários.
 17. Nunca expor chave OpenAI em código client-side.
 18. Capital segurado, projeção, valor de resgate e investimento não podem ser apresentados como conceitos equivalentes.
@@ -40,7 +40,7 @@ Branches de implementação devem nascer de `develop`, por exemplo:
 - `feat/spec-02-crm-pipeline`
 - `feat/spec-03-planning-proposals`
 - `feat/spec-04-dashboards-reporting`
-- `feat/spec-05-aegis`
+- `feat/spec-05-metis`
 - `feat/spec-06-data-portability`
 
 Fluxo obrigatório:
