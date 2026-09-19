@@ -1,7 +1,7 @@
-import type { AegisAnalysisType, BrokerAnalysis, Coverage, Diagnostic, ProposalVersion } from "@/domains/core/entities";
+import type { MetisAnalysisType, BrokerAnalysis, Coverage, Diagnostic, ProposalVersion } from "@/domains/core/entities";
 
-export type SanitizedAegisContext = {
-  analysisType: AegisAnalysisType;
+export type SanitizedMetisContext = {
+  analysisType: MetisAnalysisType;
   diagnosis: {
     age?: number;
     family?: string;
@@ -30,7 +30,7 @@ const ageFromBirthDate = (value: unknown) => {
   return now.getFullYear() - date.getFullYear() - (now < new Date(now.getFullYear(), date.getMonth(), date.getDate()) ? 1 : 0);
 };
 
-export function sanitizeAegisPayload(input: { analysisType: AegisAnalysisType; diagnostic: Diagnostic; birthDate?: string; brokerAnalysis: BrokerAnalysis | null; proposal?: ProposalVersion; coverages?: Coverage[] }): SanitizedAegisContext {
+export function sanitizeMetisPayload(input: { analysisType: MetisAnalysisType; diagnostic: Diagnostic; birthDate?: string; brokerAnalysis: BrokerAnalysis | null; proposal?: ProposalVersion; coverages?: Coverage[] }): SanitizedMetisContext {
   const data = input.diagnostic.declaredData;
   const diagnosis = {
     age: ageFromBirthDate(input.birthDate),
@@ -65,4 +65,4 @@ export function sanitizeAegisPayload(input: { analysisType: AegisAnalysisType; d
   return { analysisType: input.analysisType, diagnosis, brokerAnalysis, proposal };
 }
 
-export const sanitizedPayloadPreview = (input: SanitizedAegisContext) => JSON.stringify(input, null, 2);
+export const sanitizedPayloadPreview = (input: SanitizedMetisContext) => JSON.stringify(input, null, 2);

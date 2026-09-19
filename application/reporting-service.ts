@@ -1,7 +1,6 @@
 "use client";
 
-import { ensureCrmDemoData, listPipeline, STAGE_LABEL, type PipelineCard } from "@/application/crm-service";
-import { ensurePlanningDemo } from "@/application/planning-service";
+import { listPipeline, STAGE_LABEL, type PipelineCard } from "@/application/crm-service";
 import { getFoundation } from "@/application/foundation-service";
 import type { BrandSettings, BrokerAnalysis, Client, ClosingRecord, Coverage, Diagnostic, PipelineHistory, PipelineStage, PlanningCycle, PlanningEvent, ProposalVersion, ReportDataOrigin, ReportSnapshot } from "@/domains/core/entities";
 import { PIPELINE_STAGES } from "@/domains/core/entities";
@@ -43,22 +42,6 @@ function averageDays(items: Array<{ start: string; end?: string }>) {
   return values.length ? Math.round(values.reduce((sum, value) => sum + value, 0) / values.length) : null;
 }
 
-export async function ensureReportingDemoData() {
-  const foundation = await getFoundation();
-  if (!foundation.tenant) return;
-  await ensureCrmDemoData(); await ensurePlanningDemo();
-  const p = provider(); const histories = await p.pipelineHistory.list(foundation.tenant.id);
-  if (histories.some((item) => item.reason === "Histórico demonstrativo SPEC 04")) return;
-  const cards = await listPipeline(); const now = new Date();
-  for (const [index, card] of cards.slice(0, 7).entries()) {
-    const stages = stageOrder.slice(0, Math.max(1, stageOrder.indexOf(card.stage) + 1));
-    for (const [stageIndex, toStage] of stages.entries()) {
-      const changed = new Date(now); changed.setUTCMonth(changed.getUTCMonth() - Math.min(5, index + stageIndex)); changed.setUTCDate(Math.max(1, 4 + index * 3 + stageIndex));
-      await p.pipelineHistory.create({ ...timestamps(), tenantId: foundation.tenant.id, leadId: card.kind === "lead" ? card.id : undefined, clientId: card.kind === "client" ? card.id : undefined, fromStage: stageIndex ? stages[stageIndex - 1] : undefined, toStage, changedAt: changed.toISOString(), eventType: stageIndex ? "moved" : "created", reason: "Histórico demonstrativo SPEC 04" });
-    }
-  }
-}
-
 export type BrokerDashboard = {
   cards: PipelineCard[];
   counts: Record<PipelineStage, number>;
@@ -69,7 +52,6 @@ export type BrokerDashboard = {
 };
 
 export async function brokerDashboard(months = 6): Promise<BrokerDashboard> {
-  await ensureReportingDemoData();
   const id = await tenantId(); const p = provider();
   const [cards, clients, histories, diagnostics, cycles, proposals, closings] = await Promise.all([listPipeline(), p.clients.list(id), p.pipelineHistory.list(id), p.diagnostics.list(id), p.planningCycles.list(id), p.proposalVersions.list(id), p.closings.list(id)]);
   const since = startOfPeriod(months); const inPeriod = (date?: string) => Boolean(date && date >= since);
@@ -106,7 +88,7 @@ export async function clientDashboard(clientId: string) {
   const id = await tenantId(); const p = provider();
   const [client, cycles, diagnostics, analyses, proposals, coverages, closings, events, histories, snapshots] = await Promise.all([p.clients.findById(clientId), p.planningCycles.list(id), p.diagnostics.list(id), p.brokerAnalyses.list(id), p.proposalVersions.list(id), p.coverages.list(id), p.closings.list(id), p.planningEvents.list(id), p.pipelineHistory.list(id), p.reportSnapshots.list(id)]);
   if (!client) return null;
-  const clientCycles = cycles.filter((item) => item.clientId === clientId).sort((a, b) => b.referenceDate.localeCompare(a.referenceDate)); const current = clientCycles.find((item) => item.status !== "closed") ?? clientCycles[0] ?? null;
+  const clientCycles = cycles.filter((item) => item.clientId === clientId).sort((a, b) => b.referenceDate.localeCompare(a.referenceDate)); const current = clientCycles.find((item) => item.status === "active" || item.status === "draft") ?? clientCycles[0] ?? null;
   const diagnostic = current ? diagnostics.find((item) => item.planningCycleId === current.id) ?? null : null; const analysis = current ? analyses.find((item) => item.planningCycleId === current.id) ?? null : null;
   const clientProposals = proposals.filter((item) => item.clientId === clientId).sort((a, b) => b.number - a.number); const presented = clientProposals.filter((item) => item.presentedAt).sort((a, b) => (b.presentedAt ?? "").localeCompare(a.presentedAt ?? ""))[0] ?? null; const closing = closings.filter((item) => item.clientId === clientId).sort((a, b) => b.closedAt.localeCompare(a.closedAt))[0] ?? null; const accepted = closing ? clientProposals.find((item) => item.id === closing.proposalVersionId && item.status === "accepted") ?? null : null;
   const chosen = accepted ?? presented; const chosenCoverages = chosen ? coverages.filter((item) => item.proposalVersionId === chosen.id) : [];

@@ -22,13 +22,13 @@ O dashboard da corretora consolida CRM, Kanban, planejamentos, propostas e fecha
 
 A apresentação web e o PDF comercial são gerados a partir de uma versão específica da proposta. Na primeira geração é criado um `reportSnapshot` local, com versão de template e origem explícita dos dados (`clientProvided`, `systemCalculated`, `brokerAnalysis` e `templateStatic`). O snapshot não é regravado: alterações posteriores no cadastro não mudam um relatório histórico.
 
-## Aegis, assistente de IA
+## Metis, Assistente de Planejamento
 
-A Aegis é uma assistente contextual para o corretor. Ela analisa diagnósticos, revisa versões de propostas e prepara perguntas objetivas para reuniões, sempre como apoio à revisão profissional.
+A Metis é a Assistente de Planejamento do 7Protect. Analisa diagnósticos, revisa propostas e sugere perguntas para apoiar o planejamento de proteção financeira. Ela apoia a corretora, não substitui decisão profissional nem altera dados ou fecha propostas automaticamente.
 
-O fluxo preserva a separação arquitetural: `UI -> AegisApplicationService -> PayloadSanitizer -> AI Provider -> OpenAI -> Schema Validator -> AegisRepository`. O provider `fake` é usado por padrão em desenvolvimento e homologação. O provider `openai` utiliza exclusivamente o Route Handler server-side e só é ativado com `NEXT_PUBLIC_AEGIS_PROVIDER=openai` e `OPENAI_API_KEY` configurada no ambiente hospedado.
+O fluxo preserva a separação arquitetural: `UI -> MetisApplicationService -> PayloadSanitizer -> AI Provider -> OpenAI -> Schema Validator -> MetisRepository`. O provider `fake` é usado por padrão em desenvolvimento e homologação. O provider `openai` utiliza exclusivamente o Route Handler server-side e só é ativado com `NEXT_PUBLIC_METIS_PROVIDER=openai` e `OPENAI_API_KEY` configurada no ambiente hospedado.
 
-Antes da chamada, o payload remove nome, CPF, telefone, e-mail, endereço, apólice e IDs internos. O IndexedDB registra somente metadados, fingerprint do contexto e resultado estruturado validado. Nenhum dado do CRM, diagnóstico ou proposta é alterado pela Aegis.
+Antes da chamada, o payload remove nome, CPF, telefone, e-mail, endereço, apólice e IDs internos. O IndexedDB registra somente metadados, fingerprint do contexto e resultado estruturado validado. Nenhum dado do CRM, diagnóstico ou proposta é alterado pela Metis.
 
 ## Diretrizes do produto
 
@@ -40,7 +40,7 @@ Antes da chamada, o payload remove nome, CPF, telefone, e-mail, endereço, apól
 - Histórico de planejamentos e versões de proposta por cliente.
 - Kanban operacional/comercial como fonte dos indicadores de funil.
 - Dashboard da corretora e dashboard individual do cliente.
-- IA Aegis, usando OpenAI, como assistente do corretor para análise de diagnóstico e revisão de proposta.
+- IA Metis, usando OpenAI, como assistente do corretor para análise de diagnóstico e revisão de proposta.
 - Whitelabel obrigatório, seguindo o padrão visual e de parametrização do 7Commander.
 - Produto independente da MetLife. A primeira operação pode usar produtos MetLife, mas seguradora, produtos e identidade do cliente não devem ser hardcoded.
 - O produto não é gestor ou plataforma de investimentos. Produtos de seguradoras são referências operacionais possíveis, nunca uma limitação da plataforma.
@@ -87,7 +87,7 @@ O 7Protect deve reutilizar a linguagem visual, shell responsivo, tokens, comport
 2. `docs/specs/SPEC_02_CRM_PIPELINE.md`
 3. `docs/specs/SPEC_03_DIAGNOSTIC_PLANNING_PROPOSALS.md`
 4. `docs/specs/SPEC_04_DASHBOARDS_REPORTING.md`
-5. `docs/specs/SPEC_05_AEGIS_AI_ASSISTANT.md`
+5. `docs/specs/SPEC_05_METIS_AI_ASSISTANT.md`
 6. `docs/specs/SPEC_06_DATA_PORTABILITY_CLOUD_MIGRATION.md`
 
 Documentos complementares:
