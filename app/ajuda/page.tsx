@@ -20,6 +20,8 @@ const faqs = [
   ["Backup", "Use Backup e Dados para exportar o backup técnico em JSON antes de trocar de navegador ou computador e para restaurar a base quando necessário."],
   ["PDF de diagnóstico x PDF comercial", "O PDF de diagnóstico documenta o levantamento e a revisão das informações. O PDF comercial apresenta uma versão da solução recomendada. São documentos diferentes."],
   ["Capital segurado x prêmio x valor projetado x valor de resgate", "Capital segurado é a cobertura contratada. Prêmio é o valor pago pelo seguro. Valor projetado é uma estimativa futura quando formalmente aplicável. Valor de resgate é o valor disponível nas condições específicas do produto. Nenhum deles deve ser tratado como sinônimo de rendimento."],
+  ["Metis, Assistente de Planejamento", "A Metis analisa diagnósticos, revisa propostas e prepara perguntas para a próxima reunião com dados minimizados. Use-a depois de registrar as informações estruturadas e revise profissionalmente cada sugestão."],
+  ["O que a Metis não faz", "Ela não altera cadastro, diagnóstico ou proposta, não fecha proposta, não promete aceitação de seguro e não recomenda produto como decisão definitiva. A sugestão da IA é apoio. A decisão continua sendo da corretora."],
 ];
 
 export default function HelpPage() {

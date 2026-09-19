@@ -170,9 +170,9 @@ Indicadores possíveis:
 
 Quando um produto possuir componente real de acumulação ou resgate, valores futuros devem ser identificados corretamente como garantidos, projetados, capital segurado ou valor de resgate.
 
-## 5. Aegis - IA embarcada
+## 5. Metis - IA embarcada
 
-Aegis será a assistente de IA do 7Protect.
+Metis será a Assistente de Planejamento do 7Protect. Ela apoia a corretora e nunca substitui sua decisão profissional.
 
 Responsabilidades:
 

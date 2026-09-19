@@ -38,7 +38,7 @@ O 7Commander já separa marca do produto e marca do cliente. O 7Protect deve seg
 
 - `7Protect`
 - subtítulo: `CRM e Planejamento de Proteção Financeira`
-- assistente: `Aegis`
+- assistente: `Metis`
 
 Descrição institucional: **O 7Protect é uma plataforma CRM para corretores de seguros, voltada ao diagnóstico, planejamento e gestão da proteção financeira dos clientes.**
 
@@ -100,7 +100,7 @@ Tokens mínimos:
 
 ### Inteligência
 
-- Aegis
+- Metis
 - Relatórios
 
 ### Sistema
@@ -152,7 +152,7 @@ Blocos:
 - investimento mensal/anual;
 - capital protegido;
 - linha do tempo;
-- análise Aegis;
+- análise Metis;
 - histórico de propostas e planejamentos.
 
 ## 8. Diagnóstico
@@ -205,9 +205,9 @@ O diagnóstico deve possuir uma visualização consolidada e gerar dois document
 
 Esses documentos não substituem o PDF comercial da proposta final. A marca da corretora configurada no whitelabel deve ser aplicada ao cabeçalho e aos dados institucionais.
 
-## 10. Aegis
+## 10. Metis
 
-Aegis deve aparecer como parte do contexto do cliente, não como chatbot genérico isolado.
+Metis deve aparecer como parte do contexto do cliente, não como chatbot genérico isolado. Ela analisa diagnósticos, revisa propostas e prepara perguntas, sempre com revisão profissional da corretora.
 
 Ações principais:
 

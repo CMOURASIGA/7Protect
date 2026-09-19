@@ -1,12 +1,12 @@
-# SPEC 05 - Aegis, Assistente de IA
+# SPEC 05 - Metis, Assistente de Planejamento
 
 ## Objetivo
 
-Integrar a Aegis ao 7Protect como assistente contextual do corretor, usando OpenAI para interpretar dados estruturados do diagnóstico e revisar propostas.
+Integrar a Metis ao 7Protect como Assistente de Planejamento contextual do corretor, usando OpenAI para interpretar dados estruturados do diagnóstico e revisar propostas.
 
 ## Princípio de produto
 
-Aegis apoia o corretor.
+Metis apoia o corretor.
 
 Ela não substitui decisão profissional, não fecha proposta automaticamente e não altera dados sem confirmação explícita.
 
@@ -57,11 +57,11 @@ Gerar perguntas curtas e objetivas com base no que ainda não está claro.
 
 ## UX
 
-No dashboard do cliente, exibir bloco `Aegis` com ações:
+No dashboard do cliente, exibir bloco `Metis` com ações:
 
 - `Analisar diagnóstico`
 - `Revisar proposta`
-- `Gerar perguntas`
+- `Preparar próxima reunião`
 
 Mostrar a resposta em seções estruturadas, não apenas em texto corrido.
 
@@ -72,7 +72,7 @@ A resposta da IA deve ser validada por schema.
 Exemplo conceitual:
 
 ```ts
-type AegisAnalysis = {
+type MetisAnalysis = {
   summary: string
   attentionPoints: string[]
   protectionTopics: string[]
@@ -118,12 +118,12 @@ Fluxo:
 
 ```text
 UI
- -> AegisApplicationService
+ -> MetisApplicationService
  -> PayloadSanitizer
  -> AI Gateway/Provider
  -> OpenAI
  -> Schema Validator
- -> AegisRepository
+ -> MetisRepository
 ```
 
 Nunca chamar OpenAI diretamente de componente React.
@@ -146,8 +146,8 @@ Exemplo:
 
 ```ts
 interface AiProvider {
-  analyzeClient(input: SanitizedClientContext): Promise<AegisAnalysis>
-  reviewProposal(input: SanitizedProposalContext): Promise<AegisAnalysis>
+  analyzeClient(input: SanitizedClientContext): Promise<MetisAnalysis>
+  reviewProposal(input: SanitizedProposalContext): Promise<MetisAnalysis>
 }
 ```
 
@@ -195,11 +195,11 @@ Preparar contadores para plano futuro, por exemplo:
 - revisões de proposta no mês;
 - limite/franquia por tenant.
 
-O sistema deve permitir desabilitar Aegis sem afetar CRM, Kanban, diagnóstico e propostas.
+O sistema deve permitir desabilitar Metis sem afetar CRM, Kanban, diagnóstico e propostas.
 
 ## Critérios de aceite
 
-- Aegis é acionada manualmente;
+- Metis é acionada manualmente;
 - payload sanitizado não contém identificadores pessoais básicos;
 - saída é estruturada e validada;
 - erro da OpenAI não quebra o dashboard;
@@ -214,8 +214,8 @@ O sistema deve permitir desabilitar Aegis sem afetar CRM, Kanban, diagnóstico e
 Validar com um cliente demo:
 
 1. diagnóstico completo;
-2. análise Aegis;
+2. análise Metis;
 3. perguntas sugeridas;
 4. proposta v1;
-5. revisão Aegis da proposta;
+5. revisão Metis da proposta;
 6. falha simulada da API sem perda de dados.
