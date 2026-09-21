@@ -1,1 +1,1 @@
-import { PlanningWorkspace } from "@/components/planning-workspace"; export default function Page() { return <PlanningWorkspace section="proposals" />; }
+import { ProposalWorkspace } from "@/components/proposal-workspace"; export default function Page() { return <ProposalWorkspace />; }
