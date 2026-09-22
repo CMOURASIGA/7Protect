@@ -54,8 +54,8 @@ O fluxo oficial do projeto utiliza duas branches permanentes:
 
 Regras:
 
-1. O desenvolvimento deve ocorrer em branches de feature derivadas de `develop`, por exemplo `feat/spec-01-foundation`.
-2. A feature deve ser integrada primeiro em `develop`.
+1. O desenvolvimento e a manutenção ocorrem diretamente em `develop`.
+2. `develop` é a única linha de homologação antes da promoção para produção.
 3. Cada atualização relevante de `develop` deve gerar deploy no Vercel para validação humana.
 4. A validação funcional e visual será feita sempre sobre o ambiente publicado a partir de `develop`.
 5. Correções encontradas durante a homologação permanecem em `develop` até aprovação.
@@ -64,7 +64,9 @@ Regras:
 
 Fluxo esperado:
 
-`feat/* -> develop -> Vercel Preview/Homologação -> validação humana -> main`
+`develop -> Vercel Preview/Homologação -> validação humana -> main -> produção`
+
+Não criar branches `feat/*`, `fix/*` ou `docs/*` para o fluxo normal de desenvolvimento.
 
 O projeto Vercel já existe e deve ser utilizado para publicar cada atualização necessária para validação em `develop`. A configuração de produção associada à `main` deve permanecer separada da homologação.
 
@@ -88,7 +90,8 @@ O 7Protect deve reutilizar a linguagem visual, shell responsivo, tokens, comport
 3. `docs/specs/SPEC_03_DIAGNOSTIC_PLANNING_PROPOSALS.md`
 4. `docs/specs/SPEC_04_DASHBOARDS_REPORTING.md`
 5. `docs/specs/SPEC_05_METIS_AI_ASSISTANT.md`
-6. `docs/specs/SPEC_06_DATA_PORTABILITY_CLOUD_MIGRATION.md`
+6. `docs/specs/SPEC_06_PORTFOLIO_REPORTS.md`
+7. `docs/specs/SPEC_07_DATA_PORTABILITY_CLOUD_MIGRATION.md`
 
 Documentos complementares:
 

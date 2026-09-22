@@ -34,23 +34,18 @@ Branches permanentes:
 - `develop`: integração, homologação e validação humana.
 - `main`: versão estável aprovada.
 
-Branches de implementação devem nascer de `develop`, por exemplo:
+O desenvolvimento, a manutenção e a homologação ocorrem diretamente em `develop`.
 
-- `feat/spec-01-foundation`
-- `feat/spec-02-crm-pipeline`
-- `feat/spec-03-planning-proposals`
-- `feat/spec-04-dashboards-reporting`
-- `feat/spec-05-metis`
-- `feat/spec-06-data-portability`
+Não criar branches `feat/*`, `fix/*` ou `docs/*` para o fluxo normal.
 
 Fluxo obrigatório:
 
-`feat/* -> develop -> Vercel Preview/Homologação -> validação humana -> main`
+`develop -> Vercel Preview/Homologação -> validação humana -> main -> produção`
 
 Regras de entrega:
 
 1. Nunca implementar diretamente em `main`.
-2. Toda feature concluída deve ser integrada primeiro em `develop`.
+2. Todo trabalho concluído deve permanecer em `develop` até a promoção aprovada.
 3. Toda atualização relevante em `develop` deve ser publicada no projeto Vercel já configurado para permitir validação funcional e visual.
 4. A validação do responsável pelo produto acontece sempre sobre a versão publicada a partir de `develop`.
 5. Se houver reprovação ou ajuste, corrigir na linha de desenvolvimento e republicar `develop`.

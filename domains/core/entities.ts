@@ -47,8 +47,8 @@ export type ReportDataOrigin = "clientProvided" | "systemCalculated" | "brokerAn
 export type ReportSnapshot = EntityMetadata & {
   clientId: string;
   planningCycleId: string;
-  proposalVersionId: string;
-  type: "commercial_proposal";
+  proposalVersionId?: string;
+  type: "commercial_proposal" | "diagnostic_client" | "diagnostic_internal";
   generatedAt: string;
   templateVersion: string;
   payload: Record<string, unknown>;

@@ -111,6 +111,8 @@ Tokens mínimos:
 
 A navegação pode ser refinada durante a validação, mas os módulos devem permanecer semanticamente separados.
 
+Carteira concentra contratos aceitos e revisões. Relatórios concentra documentos já gerados e seus snapshots, sem misturar essas consultas com a manutenção de propostas.
+
 ## 6. Dashboard da corretora
 
 Primeira dobra deve priorizar indicadores operacionais, não decoração.

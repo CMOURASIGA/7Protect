@@ -132,6 +132,8 @@ Mesmo no MVP local, `tenantId` deve existir. Ele prepara o modelo para whitelabe
 - `aiAnalyses`
 - `reportSnapshots`
 
+Relatórios reabertos devem ser renderizados a partir de `reportSnapshots` persistidos. A Central de Relatórios não pode reconstruir silenciosamente um documento histórico usando o cadastro atual.
+
 ## 7. Relacionamentos principais
 
 ```text
