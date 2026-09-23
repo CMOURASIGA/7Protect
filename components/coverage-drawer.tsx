@@ -12,6 +12,8 @@ export function CoverageDrawer({ proposal, coverage, catalog, onClose, onSave, o
   const [insurerId, setInsurerId] = useState(coverage?.insurerId ?? "");
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
+  const [confirmingRemoval, setConfirmingRemoval] = useState(false);
+  const [removing, setRemoving] = useState(false);
   const availableProducts = useMemo(() => catalog.products.filter((product) => product.insurerId === insurerId && (product.active || product.id === coverage?.productId)), [catalog.products, coverage?.productId, insurerId]);
   const insurers = catalog.insurers.filter((insurer) => insurer.active || insurer.id === coverage?.insurerId);
   const coverageTypes = catalog.coverageTypes.filter((type) => type.active || type.name === coverage?.coverageType);
@@ -24,6 +26,18 @@ export function CoverageDrawer({ proposal, coverage, catalog, onClose, onSave, o
       onClose();
     } catch (cause) { setError(cause instanceof Error ? cause.message : "Não foi possível salvar a cobertura."); }
     finally { setSaving(false); }
+  };
+
+  const confirmRemoval = async () => {
+    if (!onRemove) return;
+    setError("");
+    setRemoving(true);
+    try {
+      await onRemove();
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Não foi possível remover a cobertura.");
+      setRemoving(false);
+    }
   };
 
   return <CrudDrawer title={coverage ? "Editar cobertura" : "Adicionar cobertura"} description="A cobertura pertence apenas a esta versão em rascunho. Versões apresentadas e aceitas permanecem preservadas." onClose={onClose} size="wide">
@@ -45,7 +59,8 @@ export function CoverageDrawer({ proposal, coverage, catalog, onClose, onSave, o
         <label className="crud-field full">Observação interna<textarea name="brokerNote" defaultValue={coverage?.brokerNote} /></label>
       </div></section>
       {error ? <p className="notice" role="alert">{error}</p> : null}
-      <footer className="crud-actions"><button type="button" className="button secondary" onClick={onClose}>Cancelar</button>{coverage && onRemove ? <button type="button" className="text-button" onClick={() => void onRemove()}>Remover</button> : null}{coverage && onMove ? <><button type="button" className="button secondary" onClick={() => void onMove("up")}>Subir</button><button type="button" className="button secondary" onClick={() => void onMove("down")}>Descer</button></> : null}<button className="button primary" disabled={saving}>{saving ? "Salvando..." : "Salvar cobertura"}</button></footer>
+      {confirmingRemoval ? <section className="notice" role="alert"><strong>Remover cobertura?</strong><p>Esta ação só é permitida enquanto a versão estiver em rascunho.</p><div className="crud-actions"><button type="button" className="button secondary" disabled={removing} onClick={() => setConfirmingRemoval(false)}>Manter cobertura</button><button type="button" className="text-button" disabled={removing} onClick={() => void confirmRemoval()}>{removing ? "Removendo..." : "Confirmar remoção"}</button></div></section> : null}
+      <footer className="crud-actions"><button type="button" className="button secondary" onClick={onClose} disabled={removing}>Cancelar</button>{coverage && onRemove ? <button type="button" className="text-button" disabled={removing} onClick={() => setConfirmingRemoval(true)}>Remover</button> : null}{coverage && onMove ? <><button type="button" className="button secondary" disabled={removing} onClick={() => void onMove("up")}>Subir</button><button type="button" className="button secondary" disabled={removing} onClick={() => void onMove("down")}>Descer</button></> : null}<button className="button primary" disabled={saving || removing}>{saving ? "Salvando..." : "Salvar cobertura"}</button></footer>
     </form>
   </CrudDrawer>;
 }
