@@ -1,4 +1,4 @@
-# SPEC 07 - Portabilidade de Dados e Migração Cloud
+# SPEC 08 - Portabilidade de Dados e Migração Cloud
 
 ## Objetivo
 

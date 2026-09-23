@@ -31,6 +31,13 @@ export type MetisStructuredResult = {
   proposalReview?: { alignedItems: string[]; reviewItems: string[] };
   disclaimer: string;
 };
+export type MetisUsage = { inputTokens?: number; outputTokens?: number; totalTokens?: number };
+export type MetisSanitizationEvidence = {
+  version: "metis-context-v2";
+  sentSections: string[];
+  excludedCategories: string[];
+  healthIncluded: boolean;
+};
 export type AiAnalysis = EntityMetadata & {
   clientId: string;
   planningCycleId: string;
@@ -42,6 +49,11 @@ export type AiAnalysis = EntityMetadata & {
   status: "complete" | "failed";
   structuredResult?: MetisStructuredResult;
   errorMessage?: string;
+  errorCode?: string;
+  retryable?: boolean;
+  durationMs?: number;
+  usage?: MetisUsage;
+  sanitization?: MetisSanitizationEvidence;
 };
 export type ReportDataOrigin = "clientProvided" | "systemCalculated" | "brokerAnalysis" | "templateStatic";
 export type ReportSnapshot = EntityMetadata & {

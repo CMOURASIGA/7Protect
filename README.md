@@ -26,9 +26,9 @@ A apresentação web e o PDF comercial são gerados a partir de uma versão espe
 
 A Metis é a Assistente de Planejamento do 7Protect. Analisa diagnósticos, revisa propostas e sugere perguntas para apoiar o planejamento de proteção financeira. Ela apoia a corretora, não substitui decisão profissional nem altera dados ou fecha propostas automaticamente.
 
-O fluxo preserva a separação arquitetural: `UI -> MetisApplicationService -> PayloadSanitizer -> AI Provider -> OpenAI -> Schema Validator -> MetisRepository`. O provider `fake` é usado por padrão em desenvolvimento e homologação. O provider `openai` utiliza exclusivamente o Route Handler server-side e só é ativado com `NEXT_PUBLIC_METIS_PROVIDER=openai` e `OPENAI_API_KEY` configurada no ambiente hospedado.
+O fluxo preserva a separação arquitetural: `UI -> MetisApplicationService -> PayloadSanitizer -> AI Provider -> OpenAI -> Schema Validator -> MetisRepository`. O provider `fake` é usado por padrão em desenvolvimento e homologação. O provider `openai` utiliza exclusivamente o Route Handler server-side e só é ativado com `NEXT_PUBLIC_METIS_PROVIDER=openai` e `OPENAI_API_KEY` configurada no ambiente hospedado. O provider real possui timeout, retry limitado e retorno seguro de falhas.
 
-Antes da chamada, o payload remove nome, CPF, telefone, e-mail, endereço, apólice e IDs internos. O IndexedDB registra somente metadados, fingerprint do contexto e resultado estruturado validado. Nenhum dado do CRM, diagnóstico ou proposta é alterado pela Metis.
+Antes da chamada, o payload remove nome, CPF, telefone, e-mail, endereço, apólice e IDs internos. A validação técnica expõe somente a evidência de sanitização e o fingerprint, nunca o conteúdo do cliente. O IndexedDB registra metadados, fingerprint, provider/modelo, duração, uso de tokens quando informado, resultado estruturado validado e falhas sem payload bruto. Nenhum dado do CRM, diagnóstico ou proposta é alterado pela Metis.
 
 ## Diretrizes do produto
 
@@ -91,7 +91,8 @@ O 7Protect deve reutilizar a linguagem visual, shell responsivo, tokens, comport
 4. `docs/specs/SPEC_04_DASHBOARDS_REPORTING.md`
 5. `docs/specs/SPEC_05_METIS_AI_ASSISTANT.md`
 6. `docs/specs/SPEC_06_PORTFOLIO_REPORTS.md`
-7. `docs/specs/SPEC_07_DATA_PORTABILITY_CLOUD_MIGRATION.md`
+7. `docs/specs/SPEC_07_METIS_PRODUCTION_READINESS.md`
+8. `docs/specs/SPEC_08_DATA_PORTABILITY_CLOUD_MIGRATION.md`
 
 Documentos complementares:
 
