@@ -1,5 +1,13 @@
 # SPEC 07 - Metis Production Readiness
 
+## Status
+
+**APROVADA — METIS PRODUCTION READY**
+
+- Human Validation aprovada.
+- SHA homologado: `f8c731d27d0d8243a914b978fd91c4fffe19dd6d`.
+- A SPEC 08 está liberada somente para planejamento e confirmação final de escopo. Sua implementação continua bloqueada até nova autorização explícita.
+
 ## Objetivo
 
 Levar a Metis do estado arquitetural e de homologação para condição real de uso com provider OpenAI, preservando integralmente a arquitetura entregue na SPEC 05.
@@ -175,4 +183,4 @@ Somente considerar `SPEC 07 - METIS PRODUCTION READY` quando:
 - typecheck, lint e build estiverem aprovados;
 - Human Validation com provider real passar.
 
-Somente após esse aceite iniciar a SPEC 08 - Portabilidade de Dados e Migração Cloud.
+Com este aceite, a SPEC 08 - Portabilidade de Dados e Migração Cloud fica desbloqueada para planejamento. Não iniciar sua implementação antes da confirmação final de escopo.
