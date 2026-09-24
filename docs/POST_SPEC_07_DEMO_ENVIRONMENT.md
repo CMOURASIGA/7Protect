@@ -1,6 +1,6 @@
 # Checkpoint pós-SPEC 07 — Navegação Metis e Ambiente Demo
 
-Este checkpoint não é uma nova SPEC e não autoriza o início da SPEC 08.
+Este checkpoint não é uma nova SPEC. A SPEC 08 agora é o Guia Operacional e Ajuda Contextual; a etapa de Cloud foi renumerada para SPEC 09.
 
 ## Objetivo
 

@@ -6,7 +6,7 @@
 
 - Human Validation aprovada.
 - SHA homologado: `f8c731d27d0d8243a914b978fd91c4fffe19dd6d`.
-- A SPEC 08 está liberada somente para planejamento e confirmação final de escopo. Sua implementação continua bloqueada até nova autorização explícita.
+- A SPEC 08 foi redefinida como Guia Operacional e Ajuda Contextual. A portabilidade de dados e Cloud foi renumerada para SPEC 09 e permanece bloqueada até confirmação final de escopo.
 
 ## Objetivo
 
@@ -183,4 +183,4 @@ Somente considerar `SPEC 07 - METIS PRODUCTION READY` quando:
 - typecheck, lint e build estiverem aprovados;
 - Human Validation com provider real passar.
 
-Com este aceite, a SPEC 08 - Portabilidade de Dados e Migração Cloud fica desbloqueada para planejamento. Não iniciar sua implementação antes da confirmação final de escopo.
+Com este aceite, a antiga SPEC 08 - Portabilidade de Dados e Migração Cloud fica desbloqueada somente para planejamento. Ela foi renumerada para SPEC 09. Não iniciar sua implementação antes da confirmação final de escopo.
