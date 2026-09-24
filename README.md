@@ -94,6 +94,11 @@ O 7Protect deve reutilizar a linguagem visual, shell responsivo, tokens, comport
 7. `docs/specs/SPEC_07_METIS_PRODUCTION_READINESS.md`
 8. `docs/specs/SPEC_08_DATA_PORTABILITY_CLOUD_MIGRATION.md`
 
+### Status do roadmap
+
+- **SPEC 07 — Metis Production Readiness:** aprovada como `SPEC 07 - METIS PRODUCTION READY` na Human Validation. SHA homologado: `f8c731d27d0d8243a914b978fd91c4fffe19dd6d`.
+- **SPEC 08 — Portabilidade de Dados e Migração Cloud:** desbloqueada apenas para planejamento e confirmação final de escopo. Nenhuma implementação está autorizada antes dessa confirmação.
+
 Documentos complementares:
 
 - `docs/PRODUCT_VISION.md`
