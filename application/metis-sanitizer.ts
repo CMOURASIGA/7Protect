@@ -20,6 +20,27 @@ export type SanitizedMetisContext = {
 };
 
 const text = (value: unknown) => typeof value === "string" ? value.trim() || undefined : undefined;
+const knownNonPersonPhrases = new Set(["ensino médio", "doenças graves", "vida total", "proteção financeira"]);
+const likelyPersonName = /\b[A-ZÁÉÍÓÚÂÊÔÃÕÇ][a-záéíóúâêôãõç]+(?:\s+[A-ZÁÉÍÓÚÂÊÔÃÕÇ][a-záéíóúâêôãõç]+){1,3}\b/g;
+
+/**
+ * Diagnostic and broker notes are free text. They can contain identifiers even
+ * when those fields are not part of the context schema, so remove them before
+ * the context ever reaches the provider boundary.
+ */
+const redactFreeText = (value: unknown) => {
+  const raw = text(value);
+  if (!raw) return undefined;
+  return raw
+    .replace(/\b[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}\b/g, "[e-mail removido]")
+    .replace(/\b\d{3}\.\d{3}\.\d{3}-?\d{2}\b/g, "[CPF removido]")
+    .replace(/(?:\+?55\s*)?(?:\(?\d{2}\)?\s*)?9?\d{4}[-\s]?\d{4}\b/g, "[telefone removido]")
+    .replace(/\b[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\b/gi, "[id removido]")
+    .replace(/\b(?:rua|avenida|av\.?|travessa|alameda|estrada)\s+[^,;\n]+/gi, "[endereço removido]")
+    .replace(/\b(?:apólice|apolice)\s*(?:n[ºo.]?\s*)?[\w-]+/gi, "[apólice removida]")
+    .replace(likelyPersonName, (match) => knownNonPersonPhrases.has(match.toLocaleLowerCase("pt-BR")) ? match : "[pessoa citada]")
+    .trim() || undefined;
+};
 const numeric = (value: unknown) => Number.isFinite(Number(value)) && Number(value) > 0 ? Number(value) : undefined;
 const ageFromBirthDate = (value: unknown) => {
   const birth = text(value);
@@ -34,25 +55,25 @@ export function sanitizeMetisPayload(input: { analysisType: MetisAnalysisType; d
   const data = input.diagnostic.declaredData;
   const diagnosis = {
     age: ageFromBirthDate(input.birthDate),
-    family: text(data.family),
+    family: redactFreeText(data.family),
     income: numeric(data.familyIncome),
     expenses: numeric(data.monthlyExpense),
-    assets: text(data.assets),
-    reserves: text(data.reserves),
-    debts: text(data.debts),
-    pensions: text(data.pensions),
-    existingInsurance: text(data.existingInsurance),
-    goals: text(data.goals),
-    healthRelevant: input.analysisType === "diagnostic" ? text(data.health) : undefined,
+    assets: redactFreeText(data.assets),
+    reserves: redactFreeText(data.reserves),
+    debts: redactFreeText(data.debts),
+    pensions: redactFreeText(data.pensions),
+    existingInsurance: redactFreeText(data.existingInsurance),
+    goals: redactFreeText(data.goals),
+    healthRelevant: input.analysisType === "diagnostic" ? redactFreeText(data.health) : undefined,
   };
   const brokerAnalysis = input.brokerAnalysis ? {
-    summary: input.brokerAnalysis.summary,
-    priorities: input.brokerAnalysis.priorities,
-    hypotheses: input.brokerAnalysis.hypotheses,
+    summary: redactFreeText(input.brokerAnalysis.summary),
+    priorities: redactFreeText(input.brokerAnalysis.priorities),
+    hypotheses: redactFreeText(input.brokerAnalysis.hypotheses),
     estimatedNeed: input.brokerAnalysis.estimatedNeed,
-    timeframe: input.brokerAnalysis.timeframe,
-    recommendations: input.brokerAnalysis.recommendations,
-    pendingQuestions: input.brokerAnalysis.pendingQuestions,
+    timeframe: redactFreeText(input.brokerAnalysis.timeframe),
+    recommendations: redactFreeText(input.brokerAnalysis.recommendations),
+    pendingQuestions: redactFreeText(input.brokerAnalysis.pendingQuestions),
   } : undefined;
   const proposal = input.proposal ? {
     number: input.proposal.number,
@@ -60,7 +81,7 @@ export function sanitizeMetisPayload(input: { analysisType: MetisAnalysisType; d
     totalAnnual: input.proposal.totalAnnual,
     totalProtectedCapital: input.proposal.totalProtectedCapital,
     incomeCommitment: input.proposal.incomeCommitment,
-    coverages: (input.coverages ?? []).map(({ label, objective, insuredCapital, term, monthlyPremium, description }) => ({ label, objective, insuredCapital, term, monthlyPremium, description })),
+    coverages: (input.coverages ?? []).map(({ label, objective, insuredCapital, term, monthlyPremium, description }) => ({ label, objective: redactFreeText(objective), insuredCapital, term, monthlyPremium, description: redactFreeText(description) })),
   } : undefined;
   return { analysisType: input.analysisType, diagnosis, brokerAnalysis, proposal };
 }
@@ -82,6 +103,8 @@ const allowedBrokerKeys = new Set(["summary", "priorities", "hypotheses", "estim
 const allowedProposalKeys = new Set(["number", "totalMonthly", "totalAnnual", "totalProtectedCapital", "incomeCommitment", "coverages"]);
 const allowedCoverageKeys = new Set(["label", "objective", "insuredCapital", "term", "monthlyPremium", "description"]);
 const hasOnlyAllowedKeys = (value: Record<string, unknown>, allowed: Set<string>) => Object.keys(value).every((key) => allowed.has(key));
+const containsDirectIdentifier = (value: string) => /\b[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}\b|\b\d{3}\.\d{3}\.\d{3}-?\d{2}\b|(?:\+?55\s*)?(?:\(?\d{2}\)?\s*)?9?\d{4}[-\s]?\d{4}\b|\b[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\b|\b(?:rua|avenida|av\.?|travessa|alameda|estrada)\s+/i.test(value);
+const textValues = (value: unknown): string[] => value && typeof value === "object" ? Object.values(value as Record<string, unknown>).filter((item): item is string => typeof item === "string") : [];
 
 export function isSanitizedMetisContext(value: unknown): value is SanitizedMetisContext {
   if (!value || typeof value !== "object") return false;
@@ -95,6 +118,9 @@ export function isSanitizedMetisContext(value: unknown): value is SanitizedMetis
     const coverages = (context.proposal as Record<string, unknown>).coverages;
     if (!Array.isArray(coverages) || !coverages.every((coverage) => coverage && typeof coverage === "object" && hasOnlyAllowedKeys(coverage as Record<string, unknown>, allowedCoverageKeys))) return false;
   }
+  // This protects the server boundary if a caller bypasses sanitizeMetisPayload.
+  const sensitiveText = [...textValues(context.diagnosis), ...textValues(context.brokerAnalysis), ...((context.proposal as Record<string, unknown> | undefined)?.coverages as Array<Record<string, unknown>> | undefined ?? []).flatMap((coverage) => [String(coverage.objective ?? ""), String(coverage.description ?? "")])];
+  if (sensitiveText.some(containsDirectIdentifier)) return false;
   return true;
 }
 
