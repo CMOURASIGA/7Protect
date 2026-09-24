@@ -11,6 +11,19 @@ const configuredTimeout = () => Math.min(30_000, Math.max(3_000, Number(process.
 const configuredAttempts = () => Math.min(3, Math.max(1, Number(process.env.OPENAI_METIS_MAX_ATTEMPTS ?? 2)));
 const retryableStatus = (status: number) => status === 408 || status === 429 || status >= 500;
 const pause = (milliseconds: number) => new Promise((resolve) => setTimeout(resolve, milliseconds));
+const demoWindowMs = () => Math.min(86_400_000, Math.max(60_000, Number(process.env.DEMO_METIS_WINDOW_MS ?? 3_600_000)));
+const demoMaxCalls = () => Math.min(20, Math.max(1, Number(process.env.DEMO_METIS_MAX_CALLS ?? 6)));
+const demoCalls = new Map<string, number[]>();
+function consumeDemoCall(request: Request) {
+  if (process.env.NEXT_PUBLIC_DEMO_MODE !== "true" || process.env.VERCEL_ENV === "production") return true;
+  const session = request.headers.get("x-7protect-demo-session");
+  if (!session || !/^[a-z0-9-]{16,}$/i.test(session)) return false;
+  const forwarded = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  const key = `${forwarded}:${session}`; const now = Date.now(); const entries = (demoCalls.get(key) ?? []).filter((at) => at > now - demoWindowMs());
+  if (entries.length >= demoMaxCalls()) return false;
+  entries.push(now); demoCalls.set(key, entries);
+  return true;
+}
 
 async function requestOpenAi(key: string, model: string, context: SanitizedMetisContext) {
   const startedAt = Date.now();
@@ -44,6 +57,7 @@ async function requestOpenAi(key: string, model: string, context: SanitizedMetis
 }
 
 export async function POST(request: Request) {
+  if (!consumeDemoCall(request)) return NextResponse.json({ error: "Limite de demonstração da Metis atingido. Reinicie a demonstração ou tente novamente posteriormente.", code: "demo_limit", retryable: false }, { status: 429 });
   const key = process.env.OPENAI_API_KEY;
   if (!key) return NextResponse.json({ error: "A Metis real não está configurada neste ambiente.", code: "not_configured", retryable: false }, { status: 503 });
   let context: SanitizedMetisContext;

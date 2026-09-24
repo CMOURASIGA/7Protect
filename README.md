@@ -98,6 +98,7 @@ O 7Protect deve reutilizar a linguagem visual, shell responsivo, tokens, comport
 
 - **SPEC 07 — Metis Production Readiness:** aprovada como `SPEC 07 - METIS PRODUCTION READY` na Human Validation. SHA homologado: `f8c731d27d0d8243a914b978fd91c4fffe19dd6d`.
 - **SPEC 08 — Portabilidade de Dados e Migração Cloud:** desbloqueada apenas para planejamento e confirmação final de escopo. Nenhuma implementação está autorizada antes dessa confirmação.
+- **Checkpoint pós-SPEC 07 — Navegação Metis e Ambiente Demo:** em implementação e validação, sem iniciar a SPEC 08. Ver `docs/POST_SPEC_07_DEMO_ENVIRONMENT.md`.
 
 Documentos complementares:
 
