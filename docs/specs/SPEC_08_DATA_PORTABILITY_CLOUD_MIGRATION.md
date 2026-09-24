@@ -1,5 +1,11 @@
 # SPEC 08 - Portabilidade de Dados e Migração Cloud
 
+## Status
+
+**Planejamento desbloqueado — implementação bloqueada até confirmação final de escopo.**
+
+Esta SPEC só pode avançar para desenvolvimento após revisão explícita da abrangência da entrega Cloud. Até lá, este documento é a base de planejamento e não autoriza alteração de código, migração de dados ou ativação de provider Cloud.
+
 ## Objetivo
 
 Preparar o 7Protect para operar por tempo indeterminado em modo local e, quando contratado, migrar a base para Supabase sem reconstrução do produto.
