@@ -7,17 +7,19 @@ import type { MetisAnalysisType, AiAnalysis, ProposalVersion } from "@/domains/c
 const date = (value: string) => new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short" }).format(new Date(value));
 const actionLabel: Record<MetisAnalysisType, string> = { diagnostic: "Analisar diagnóstico", proposal_review: "Revisar proposta", meeting_questions: "Preparar próxima reunião" };
 
-export function MetisPanel({ clientId, proposal }: { clientId: string; proposal?: ProposalVersion }) {
+export function MetisPanel({ clientId, proposal, proposals = [] }: { clientId: string; proposal?: ProposalVersion; proposals?: ProposalVersion[] }) {
   const [analyses, setAnalyses] = useState<AiAnalysis[]>([]);
   const [busy, setBusy] = useState<MetisAnalysisType | null>(null);
   const [error, setError] = useState("");
   const [technicalEvidence, setTechnicalEvidence] = useState("");
+  const [selectedProposalId, setSelectedProposalId] = useState(proposal?.id ?? "");
   const enabled = isMetisEnabled();
+  const selectedProposal = proposals.find((item) => item.id === selectedProposalId) ?? proposal;
   const refresh = async () => setAnalyses(await listMetisAnalyses(clientId));
   useEffect(() => { let active = true; void listMetisAnalyses(clientId).then((items) => { if (active) setAnalyses(items); }); return () => { active = false; }; }, [clientId]);
   const run = async (analysisType: MetisAnalysisType) => {
     setBusy(analysisType); setError("");
-    try { await analyzeWithMetis(clientId, analysisType, analysisType === "proposal_review" ? proposal?.id : undefined); await refresh(); }
+    try { await analyzeWithMetis(clientId, analysisType, analysisType === "proposal_review" ? selectedProposal?.id : undefined); await refresh(); }
     catch (reason) { setError(reason instanceof Error ? reason.message : "A Metis não conseguiu concluir esta ação."); await refresh(); }
     finally { setBusy(null); }
   };
@@ -35,7 +37,7 @@ export function MetisPanel({ clientId, proposal }: { clientId: string; proposal?
   const last = analyses.find((item) => item.status === "complete");
   return <section className="card metis-panel">
     <div className="metis-head"><div><p className="eyebrow">METIS</p><h3>Assistente de Planejamento</h3><p>Analisa diagnósticos, revisa propostas e sugere perguntas para apoiar o planejamento de proteção financeira.</p><p>Usa IA com dados minimizados e exige revisão profissional da corretora.</p></div><span className="metis-badge">Apoio ao corretor</span></div>
-    {enabled ? <div className="metis-actions">{(["diagnostic", "proposal_review", "meeting_questions"] as MetisAnalysisType[]).map((type) => <button key={type} className="button secondary" disabled={Boolean(busy) || (type === "proposal_review" && !proposal)} onClick={() => run(type)}>{busy === type ? "Processando..." : actionLabel[type]}</button>)}</div> : <p className="metis-empty">A Metis está desabilitada neste ambiente. O histórico permanece disponível e o restante do sistema continua funcionando.</p>}
+    {enabled ? <><div className="metis-actions">{(["diagnostic", "proposal_review", "meeting_questions"] as MetisAnalysisType[]).map((type) => <button key={type} className="button secondary" disabled={Boolean(busy) || (type === "proposal_review" && !selectedProposal)} onClick={() => run(type)}>{busy === type ? "Processando..." : actionLabel[type]}</button>)}</div>{proposals.length > 1 ? <label className="field metis-proposal-select">Versão para revisar<select value={selectedProposal?.id ?? ""} onChange={(event) => setSelectedProposalId(event.target.value)} disabled={Boolean(busy)}>{proposals.map((item) => <option key={item.id} value={item.id}>Proposta v{item.number} · {item.status}</option>)}</select></label> : null}</> : <p className="metis-empty">A Metis está desabilitada neste ambiente. O histórico permanece disponível e o restante do sistema continua funcionando.</p>}
     <details className="metis-validation"><summary>Validação técnica</summary><div><button className="button secondary" disabled={Boolean(busy)} onClick={inspectEvidence}>Verificar dados minimizados</button>{enabled ? <button className="button secondary" disabled={Boolean(busy)} onClick={simulateFailure}>Simular falha da Metis</button> : null}</div>{technicalEvidence ? <pre>{technicalEvidence}</pre> : <p>A evidência exibe somente a política aplicada e o fingerprint, nunca o conteúdo do cliente.</p>}</details>
     {error ? <p className="form-error" role="alert">{error} {enabled ? "Você pode tentar novamente." : "Ative a Metis quando for apropriado."} O CRM, diagnóstico e proposta não foram alterados.</p> : null}
     {last?.structuredResult ? <MetisResult analysis={last} /> : <p className="metis-empty">Ainda não há análise salva para este cliente.</p>}
