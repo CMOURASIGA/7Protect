@@ -44,7 +44,7 @@ domains/
   planning/
   proposals/
   reports/
-  aegis/
+  metis/
 application/
 repositories/
   contracts/
@@ -127,7 +127,7 @@ No canto superior esquerdo da sidebar deve aparecer a marca do cliente/corretora
 - Planejamentos
 - Propostas
 - Carteira
-- Aegis
+- Metis
 - Relatórios
 - Configurações
 - Backup e Dados

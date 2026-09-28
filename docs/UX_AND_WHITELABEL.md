@@ -37,8 +37,10 @@ O 7Commander já separa marca do produto e marca do cliente. O 7Protect deve seg
 ### Marca do produto
 
 - `7Protect`
-- subtítulo sugerido: `Gestão de proteção financeira`
-- assistente: `Aegis`
+- subtítulo: `CRM e Planejamento de Proteção Financeira`
+- assistente: `Metis`
+
+Descrição institucional: **O 7Protect é uma plataforma CRM para corretores de seguros, voltada ao diagnóstico, planejamento e gestão da proteção financeira dos clientes.**
 
 ### Marca da corretora
 
@@ -98,7 +100,7 @@ Tokens mínimos:
 
 ### Inteligência
 
-- Aegis
+- Metis
 - Relatórios
 
 ### Sistema
@@ -108,6 +110,8 @@ Tokens mínimos:
 - Ajuda
 
 A navegação pode ser refinada durante a validação, mas os módulos devem permanecer semanticamente separados.
+
+Carteira concentra contratos aceitos e revisões. Relatórios concentra documentos já gerados e seus snapshots, sem misturar essas consultas com a manutenção de propostas.
 
 ## 6. Dashboard da corretora
 
@@ -150,7 +154,7 @@ Blocos:
 - investimento mensal/anual;
 - capital protegido;
 - linha do tempo;
-- análise Aegis;
+- análise Metis;
 - histórico de propostas e planejamentos.
 
 ## 8. Diagnóstico
@@ -194,9 +198,18 @@ Cards devem mostrar apenas informação operacional útil:
 
 O drag-and-drop deve atualizar histórico e indicadores.
 
-## 10. Aegis
+## 9.1 PDF do diagnóstico
 
-Aegis deve aparecer como parte do contexto do cliente, não como chatbot genérico isolado.
+O diagnóstico deve possuir uma visualização consolidada e gerar dois documentos sob demanda no dispositivo:
+
+- PDF para o cliente, com dados declarados apropriados para compartilhamento;
+- PDF completo interno, que pode incluir análise profissional e notas internas.
+
+Esses documentos não substituem o PDF comercial da proposta final. A marca da corretora configurada no whitelabel deve ser aplicada ao cabeçalho e aos dados institucionais.
+
+## 10. Metis
+
+Metis deve aparecer como parte do contexto do cliente, não como chatbot genérico isolado. Ela analisa diagnósticos, revisa propostas e prepara perguntas, sempre com revisão profissional da corretora.
 
 Ações principais:
 
@@ -211,6 +224,8 @@ A resposta deve ser renderizada em blocos estruturados:
 - oportunidades de análise;
 - perguntas recomendadas;
 - revisão da proposta.
+
+O bloco deve informar que utiliza IA com dados minimizados e que o resultado exige revisão profissional da corretora. Em caso de indisponibilidade, deve mostrar erro recuperável, preservar a tela e permitir nova tentativa.
 
 ## 11. Responsividade
 

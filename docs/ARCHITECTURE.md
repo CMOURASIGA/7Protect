@@ -19,7 +19,7 @@ A UI nunca deve chamar IndexedDB, Supabase ou APIs de persistência diretamente.
 - biblioteca de acesso ao IndexedDB pode ser Dexie ou wrapper equivalente, desde que escondida atrás dos repositories
 - geração de XLSX via biblioteca dedicada
 - geração de PDF a partir do template de relatório
-- OpenAI API para Aegis
+- OpenAI API para Metis
 
 ## 3. Camadas
 
@@ -41,7 +41,7 @@ Exemplos:
 - `MovePipelineCardService`
 - `CreateProposalVersionService`
 - `GenerateClientReportService`
-- `AnalyzeClientWithAegisService`
+- `AnalyzeClientWithMetisService`
 
 ### Repository Interfaces
 
@@ -131,6 +131,8 @@ Mesmo no MVP local, `tenantId` deve existir. Ele prepara o modelo para whitelabe
 - `followUps`
 - `aiAnalyses`
 - `reportSnapshots`
+
+Relatórios reabertos devem ser renderizados a partir de `reportSnapshots` persistidos. A Central de Relatórios não pode reconstruir silenciosamente um documento histórico usando o cadastro atual.
 
 ## 7. Relacionamentos principais
 
@@ -233,9 +235,9 @@ Requisitos desde o MVP:
 - operações de IA devem passar por endpoint server-side quando houver deploy web;
 - preparar futura implementação de Auth, RLS e auditoria no Supabase.
 
-## 13. Aegis
+## 13. Metis
 
-Aegis é uma capacidade separada da persistência.
+Metis é uma capacidade separada da persistência.
 
 Fluxo:
 
@@ -244,6 +246,8 @@ Fluxo:
 A saída deve ser JSON estruturado e validado por schema.
 
 A IA não altera proposta, cobertura ou cadastro automaticamente. Qualquer aplicação de sugestão exige ação explícita do corretor.
+
+Na implementação inicial, `MetisApplicationService` obtém os dados pelo provider, passa somente o contexto minimizado para `PayloadSanitizer` e seleciona um `AiProvider`. O provider `fake` atende desenvolvimento e homologação. O provider OpenAI chama `app/api/metis/route.ts`, em runtime Node.js, e a chave `OPENAI_API_KEY` existe somente no servidor. A resposta é validada antes da criação de `aiAnalyses`; falhas são registradas sem payload bruto e sem alterar dados de domínio.
 
 ## 14. Regras de evolução
 

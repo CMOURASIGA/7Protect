@@ -1,6 +1,8 @@
 # 7Protect
 
-CRM especializado para corretoras de seguros e consultoria de proteção financeira, integrante do HUB da Consult Services.
+**CRM e Planejamento de Proteção Financeira**
+
+O 7Protect é uma plataforma CRM para corretores de seguros, voltada ao diagnóstico, planejamento e gestão da proteção financeira dos clientes.
 
 ## Propósito
 
@@ -9,6 +11,24 @@ O 7Protect digitaliza o fluxo hoje executado manualmente pelo corretor: captaç�
 Fluxo principal:
 
 `Lead -> Cliente -> Diagnóstico -> Tarefa -> Planejamento -> Proposta -> Apresentação -> Fechamento -> Acompanhamento`
+
+## Documentos do atendimento
+
+O PDF do diagnóstico registra o levantamento e a revisão das informações declaradas pelo cliente. Ele não substitui o PDF comercial da proposta final, que apresentará a solução recomendada em etapa própria.
+
+## Dashboards e apresentação comercial
+
+O dashboard da corretora consolida CRM, Kanban, planejamentos, propostas e fechamentos já persistidos no dispositivo. Seus filtros operacionais levam ao Kanban correspondente, e o dashboard individual reúne a fotografia financeira declarada, a proposta selecionada e o histórico do cliente.
+
+A apresentação web e o PDF comercial são gerados a partir de uma versão específica da proposta. Na primeira geração é criado um `reportSnapshot` local, com versão de template e origem explícita dos dados (`clientProvided`, `systemCalculated`, `brokerAnalysis` e `templateStatic`). O snapshot não é regravado: alterações posteriores no cadastro não mudam um relatório histórico.
+
+## Metis, Assistente de Planejamento
+
+A Metis é a Assistente de Planejamento do 7Protect. Analisa diagnósticos, revisa propostas e sugere perguntas para apoiar o planejamento de proteção financeira. Ela apoia a corretora, não substitui decisão profissional nem altera dados ou fecha propostas automaticamente.
+
+O fluxo preserva a separação arquitetural: `UI -> MetisApplicationService -> PayloadSanitizer -> AI Provider -> OpenAI -> Schema Validator -> MetisRepository`. O provider `fake` é usado por padrão em desenvolvimento e homologação. O provider `openai` utiliza exclusivamente o Route Handler server-side e só é ativado com `NEXT_PUBLIC_METIS_PROVIDER=openai` e `OPENAI_API_KEY` configurada no ambiente hospedado. O provider real possui timeout, retry limitado e retorno seguro de falhas.
+
+Antes da chamada, o payload remove nome, CPF, telefone, e-mail, endereço, apólice e IDs internos. A validação técnica expõe somente a evidência de sanitização e o fingerprint, nunca o conteúdo do cliente. O IndexedDB registra metadados, fingerprint, provider/modelo, duração, uso de tokens quando informado, resultado estruturado validado e falhas sem payload bruto. Nenhum dado do CRM, diagnóstico ou proposta é alterado pela Metis.
 
 ## Diretrizes do produto
 
@@ -20,9 +40,35 @@ Fluxo principal:
 - Histórico de planejamentos e versões de proposta por cliente.
 - Kanban operacional/comercial como fonte dos indicadores de funil.
 - Dashboard da corretora e dashboard individual do cliente.
-- IA Aegis, usando OpenAI, como assistente do corretor para análise de diagnóstico e revisão de proposta.
+- IA Metis, usando OpenAI, como assistente do corretor para análise de diagnóstico e revisão de proposta.
 - Whitelabel obrigatório, seguindo o padrão visual e de parametrização do 7Commander.
 - Produto independente da MetLife. A primeira operação pode usar produtos MetLife, mas seguradora, produtos e identidade do cliente não devem ser hardcoded.
+- O produto não é gestor ou plataforma de investimentos. Produtos de seguradoras são referências operacionais possíveis, nunca uma limitação da plataforma.
+
+## Estratégia de branches e validação
+
+O fluxo oficial do projeto utiliza duas branches permanentes:
+
+- `develop`: branch de integração, homologação e validação humana. Toda implementação concluída deve chegar primeiro nesta branch e gerar um deploy de preview/homologação no Vercel para validação do responsável pelo produto.
+- `main`: branch estável. Somente código já validado em `develop` pode ser promovido para `main`.
+
+Regras:
+
+1. O desenvolvimento e a manutenção ocorrem diretamente em `develop`.
+2. `develop` é a única linha de homologação antes da promoção para produção.
+3. Cada atualização relevante de `develop` deve gerar deploy no Vercel para validação humana.
+4. A validação funcional e visual será feita sempre sobre o ambiente publicado a partir de `develop`.
+5. Correções encontradas durante a homologação permanecem em `develop` até aprovação.
+6. Somente após aprovação explícita o checkpoint pode ser promovido de `develop` para `main`.
+7. Não desenvolver diretamente em `main` e não usar `main` como ambiente de homologação.
+
+Fluxo esperado:
+
+`develop -> Vercel Preview/Homologação -> validação humana -> main -> produção`
+
+Não criar branches `feat/*`, `fix/*` ou `docs/*` para o fluxo normal de desenvolvimento.
+
+O projeto Vercel já existe e deve ser utilizado para publicar cada atualização necessária para validação em `develop`. A configuração de produção associada à `main` deve permanecer separada da homologação.
 
 ## Referência de frontend
 
@@ -43,8 +89,18 @@ O 7Protect deve reutilizar a linguagem visual, shell responsivo, tokens, comport
 2. `docs/specs/SPEC_02_CRM_PIPELINE.md`
 3. `docs/specs/SPEC_03_DIAGNOSTIC_PLANNING_PROPOSALS.md`
 4. `docs/specs/SPEC_04_DASHBOARDS_REPORTING.md`
-5. `docs/specs/SPEC_05_AEGIS_AI_ASSISTANT.md`
-6. `docs/specs/SPEC_06_DATA_PORTABILITY_CLOUD_MIGRATION.md`
+5. `docs/specs/SPEC_05_METIS_AI_ASSISTANT.md`
+6. `docs/specs/SPEC_06_PORTFOLIO_REPORTS.md`
+7. `docs/specs/SPEC_07_METIS_PRODUCTION_READINESS.md`
+8. `docs/specs/SPEC_08_OPERATIONAL_GUIDE_CONTEXTUAL_HELP.md`
+9. `docs/specs/SPEC_09_DATA_PORTABILITY_CLOUD_MIGRATION.md`
+
+### Status do roadmap
+
+- **SPEC 07 — Metis Production Readiness:** aprovada como `SPEC 07 - METIS PRODUCTION READY` na Human Validation. SHA homologado: `f8c731d27d0d8243a914b978fd91c4fffe19dd6d`.
+- **SPEC 08 — Guia Operacional e Ajuda Contextual:** em implementação em `develop`. A Ajuda passa a documentar o fluxo operacional e as rotinas de apoio existentes.
+- **SPEC 09 — Portabilidade de Dados e Migração Cloud:** mantida para planejamento futuro. Nenhuma implementação Cloud está autorizada nesta etapa.
+- **Checkpoint pós-SPEC 07 — Navegação Metis e Ambiente Demo:** concluído tecnicamente. Ver `docs/POST_SPEC_07_DEMO_ENVIRONMENT.md`.
 
 Documentos complementares:
 
@@ -54,4 +110,4 @@ Documentos complementares:
 
 ## Sequência recomendada de desenvolvimento
 
-Implementar as SPECs em ordem. Cada SPEC deve gerar um checkpoint validável pelo usuário antes do início da próxima etapa.
+Implementar as SPECs em ordem. Cada SPEC deve gerar um checkpoint validável pelo usuário em `develop`, publicado no Vercel, antes do início da próxima etapa e antes de qualquer promoção para `main`.

@@ -84,7 +84,7 @@ Quando disponível:
 - coberturas por categoria;
 - objetivos protegidos;
 - vigências;
-- gaps identificados pelo corretor/Aegis.
+- gaps identificados pelo corretor/Metis.
 
 ### Linha do tempo
 

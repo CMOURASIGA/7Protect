@@ -15,7 +15,11 @@ Há duplicidade de digitação, baixa rastreabilidade, ausência de histórico e
 
 ## 2. Proposta do 7Protect
 
-O 7Protect será um CRM vertical para corretoras de seguros e consultoria de proteção financeira.
+O 7Protect é uma plataforma CRM para corretores de seguros, voltada ao diagnóstico, planejamento e gestão da proteção financeira dos clientes.
+
+Seu posicionamento é **CRM e Planejamento de Proteção Financeira**. Ele reúne a gestão comercial do corretor, com leads, clientes, Kanban, funil, conversão e carteira, e o planejamento da proteção financeira do cliente, com diagnóstico, objetivos, necessidades, propostas, coberturas e acompanhamento.
+
+O produto é independente de seguradora e não deve ser apresentado como gestor ou plataforma de investimentos. Uma seguradora pode ser usada como referência operacional inicial, sem restringir marca, produtos ou linguagem da plataforma.
 
 O produto organiza todo o ciclo de atendimento:
 
@@ -110,6 +114,8 @@ Saídas previstas:
 
 O relatório não deve ser um arquivo editado manualmente dentro do sistema. Deve ser uma renderização de dados e templates versionados.
 
+O PDF do diagnóstico é um documento de levantamento e revisão. Ele é diferente do PDF comercial da proposta final, que deverá apresentar a solução recomendada sem substituir ou alterar o histórico do diagnóstico.
+
 ### 3.7 Carteira e acompanhamento
 
 Após o fechamento, o cliente passa a compor a carteira da corretora.
@@ -164,9 +170,9 @@ Indicadores possíveis:
 
 Quando um produto possuir componente real de acumulação ou resgate, valores futuros devem ser identificados corretamente como garantidos, projetados, capital segurado ou valor de resgate.
 
-## 5. Aegis - IA embarcada
+## 5. Metis - IA embarcada
 
-Aegis será a assistente de IA do 7Protect.
+Metis será a Assistente de Planejamento do 7Protect. Ela apoia a corretora e nunca substitui sua decisão profissional.
 
 Responsabilidades:
 

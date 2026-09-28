@@ -20,25 +20,38 @@ Orientações obrigatórias para desenvolvimento do 7Protect.
 12. Nova proposta cria nova versão. Nunca apagar versão apresentada ao cliente.
 13. Movimentações de Kanban devem gerar histórico.
 14. Dados declarados pelo cliente e análise do corretor devem ser campos/entidades diferentes.
-15. Aegis não pode alterar dados ou proposta sem confirmação explícita do corretor.
+15. Metis não pode alterar dados ou proposta sem confirmação explícita do corretor.
 16. Antes de enviar dados para IA, minimizar e remover identificadores desnecessários.
 17. Nunca expor chave OpenAI em código client-side.
 18. Capital segurado, projeção, valor de resgate e investimento não podem ser apresentados como conceitos equivalentes.
 19. O sistema deve continuar funcional quando a IA estiver indisponível.
 20. O sistema deve continuar funcional sem Supabase no MVP.
 
-## Branches
+## Branches e fluxo obrigatório
 
-Sugestão:
+Branches permanentes:
 
-- `main`: versão estável
-- `develop`: integração
-- `feat/spec-01-foundation`
-- `feat/spec-02-crm-pipeline`
-- `feat/spec-03-planning-proposals`
-- `feat/spec-04-dashboards-reporting`
-- `feat/spec-05-aegis`
-- `feat/spec-06-data-portability`
+- `develop`: integração, homologação e validação humana.
+- `main`: versão estável aprovada.
+
+O desenvolvimento, a manutenção e a homologação ocorrem diretamente em `develop`.
+
+Não criar branches `feat/*`, `fix/*` ou `docs/*` para o fluxo normal.
+
+Fluxo obrigatório:
+
+`develop -> Vercel Preview/Homologação -> validação humana -> main -> produção`
+
+Regras de entrega:
+
+1. Nunca implementar diretamente em `main`.
+2. Todo trabalho concluído deve permanecer em `develop` até a promoção aprovada.
+3. Toda atualização relevante em `develop` deve ser publicada no projeto Vercel já configurado para permitir validação funcional e visual.
+4. A validação do responsável pelo produto acontece sempre sobre a versão publicada a partir de `develop`.
+5. Se houver reprovação ou ajuste, corrigir na linha de desenvolvimento e republicar `develop`.
+6. Somente após aprovação explícita promover o checkpoint de `develop` para `main`.
+7. `main` não é ambiente de teste nem de homologação.
+8. O início da SPEC seguinte deve respeitar o checkpoint validado da etapa anterior, salvo orientação explícita em contrário.
 
 ## Qualidade mínima por checkpoint
 
@@ -49,4 +62,5 @@ Sugestão:
 - dados demo suficientes para validação humana;
 - responsividade validada;
 - sem regressão do whitelabel;
+- deploy de `develop` disponível no Vercel para homologação;
 - README/changelog da etapa atualizado quando necessário.

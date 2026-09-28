@@ -1,0 +1,4 @@
+.header-status { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
+.demo-badge { padding: 6px 9px; border-radius: 999px; background: #fff4d6; color: #7a5100; font-size: 11px; font-weight: 800; }
+.demo-reset { padding: 8px 10px; font-size: 11px; }
+@media (max-width: 520px) { .demo-reset { max-width: 132px; padding: 7px; font-size: 10px; } }
