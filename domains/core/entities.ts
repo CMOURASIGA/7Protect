@@ -65,3 +65,16 @@ export type ReportSnapshot = EntityMetadata & {
   templateVersion: string;
   payload: Record<string, unknown>;
 };
+
+export const COMMERCIAL_ACTIVITY_TYPES = ["ab_phone", "approach_scheduled", "approach_completed", "closing_scheduled", "closing_completed", "proposal", "recommendation"] as const;
+export type CommercialActivityType = (typeof COMMERCIAL_ACTIVITY_TYPES)[number];
+export type CommercialActivityStatus = "planned" | "completed" | "cancelled";
+export type CommercialContactStage = "market_base" | "hot40" | "opportunity" | "client";
+export type Contact = EntityMetadata & { fullName: string; email?: string; phone?: string; origin?: string; consultant?: string; status: "active" | "inactive"; commercialStage: CommercialContactStage; notes?: string };
+export type ProspectQualification = EntityMetadata & { contactId: string; status: "pending" | "qualified" | "not_qualified"; source?: string; notes?: string; qualifiedAt?: string };
+export type Hot40Membership = EntityMetadata & { contactId: string; status: "active" | "paused" | "converted" | "removed"; enteredAt: string; priority?: "low" | "normal" | "high"; notes?: string };
+export type CommercialActivity = EntityMetadata & { contactId: string; type: CommercialActivityType; status: CommercialActivityStatus; scheduledAt?: string; completedAt?: string; notes?: string; createdBy?: string };
+export type CommercialOpportunity = EntityMetadata & { contactId: string; title: string; status: "open" | "won" | "lost"; source?: string; expectedAt?: string; notes?: string };
+export type CommercialGoal = EntityMetadata & { name: string; target: number; periodStart: string; periodEnd: string; status: "active" | "closed"; notes?: string };
+export type Referral = EntityMetadata & { contactId: string; referredContactId?: string; status: "new" | "contacted" | "converted" | "discarded"; notes?: string };
+export type Notification = EntityMetadata & { contactId?: string; title: string; message: string; type: "info" | "warning" | "success"; status: "unread" | "read"; readAt?: string };

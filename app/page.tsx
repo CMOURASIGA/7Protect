@@ -1,1 +1,1 @@
-import { Dashboard } from "@/components/page-content"; export default function Page() { return <Dashboard />; }
+import { CommercialDashboard } from "@/components/commercial-workspace"; import { Dashboard } from "@/components/page-content"; import { isCommercialV2Mode } from "@/lib/domain-mode"; export default function Page() { return isCommercialV2Mode() ? <CommercialDashboard /> : <Dashboard />; }

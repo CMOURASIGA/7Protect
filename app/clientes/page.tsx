@@ -1,1 +1,1 @@
-import { ClientsWorkspace } from "@/components/crm-workspace"; export default function Page() { return <ClientsWorkspace />; }
+import { CommercialClientsWorkspace } from "@/components/commercial-workspace"; import { ClientsWorkspace } from "@/components/crm-workspace"; import { isCommercialV2Mode } from "@/lib/domain-mode"; export default function Page() { return isCommercialV2Mode() ? <CommercialClientsWorkspace /> : <ClientsWorkspace />; }

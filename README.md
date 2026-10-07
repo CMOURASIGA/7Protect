@@ -95,6 +95,16 @@ O 7Protect deve reutilizar a linguagem visual, shell responsivo, tokens, comport
 8. `docs/specs/SPEC_08_OPERATIONAL_GUIDE_CONTEXTUAL_HELP.md`
 9. `docs/specs/SPEC_09_DATA_PORTABILITY_CLOUD_MIGRATION.md`
 
+### Linha V2 experimental
+
+A fundação do novo domínio comercial está isolada na branch `v2/commercial-domain`, sem alterar o fluxo homologado em `develop` e `main`. A ativação é explícita por ambiente:
+
+```env
+NEXT_PUBLIC_DOMAIN_MODE=commercial-v2
+```
+
+Sem essa variável, o produto mantém o modo `legacy`. A especificação está em `docs/specs/V2_SPEC_01_COMMERCIAL_DOMAIN_FOUNDATION.md`.
+
 ### Status do roadmap
 
 - **SPEC 07 — Metis Production Readiness:** aprovada como `SPEC 07 - METIS PRODUCTION READY` na Human Validation. SHA homologado: `f8c731d27d0d8243a914b978fd91c4fffe19dd6d`.
