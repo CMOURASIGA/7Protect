@@ -2,7 +2,7 @@
 
 ## Estado
 
-Em implementação na branch `v2/commercial-domain`. Esta SPEC não altera `develop` ou `main`.
+APPROVED. SHA homologado: `6eaa2987ec8c23e7199e76172aad5b223ed180b2`. A V2-SPEC 02 foi autorizada a partir desse checkpoint na branch `v2/commercial-domain`, sem alterar `develop` ou `main`.
 
 ## Decisões de fundação
 
@@ -48,7 +48,7 @@ Não iniciar a V2-SPEC 02 antes da aprovação humana desta base.
 
 `NEXT_PUBLIC_DOMAIN_MODE=commercial-v2` ativa a V2. `legacy` (ou ausência) preserva a experiência anterior. A alteração requer novo build/deploy; não é uma migração de dados. No Vercel, o override fica restrito ao Preview da branch `v2/commercial-domain`.
 
-A SPEC permanece aguardando Human Validation. A V2-SPEC 02 não foi iniciada.
+Registro histórico: este checkpoint recebeu as correções finais abaixo e foi posteriormente homologado no SHA `6eaa2987ec8c23e7199e76172aad5b223ed180b2`.
 
 ### Evidências e limites da revisão
 
@@ -63,4 +63,4 @@ Typecheck, lint (zero erros, cinco avisos preexistentes), build V2 e os três te
 - Drawer: Planejada mostra `Data agendada` e grava `scheduledAt`; Realizada mostra `Data realizada` e grava `completedAt`. Atividades realizadas podem preservar um agendamento anterior como histórico, mas agrupamento, ordenação e exibição utilizam `completedAt`.
 - Planejada não aceita data realizada. Realizada exige data realizada, inclusive na chamada direta ao repository. Semana, mês e ano continuam derivados.
 - Suíte `npm test`: testes de service/repository com IndexedDB em memória, concorrência, isolamento de tenant, qualificação excluída, reparo de registros anteriores e semântica de datas, além dos testes existentes de agregação.
-- V2-SPEC 02 permanece não iniciada. A aprovação humana continua pendente deste checkpoint.
+- V2-SPEC 02 permanece não iniciada. Esse checkpoint foi posteriormente homologado no SHA `6eaa2987ec8c23e7199e76172aad5b223ed180b2`, com autorização para iniciar a V2-SPEC 02.

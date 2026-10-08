@@ -121,3 +121,11 @@ Documentos complementares:
 ## Sequência recomendada de desenvolvimento
 
 Implementar as SPECs em ordem. Cada SPEC deve gerar um checkpoint validável pelo usuário em `develop`, publicado no Vercel, antes do início da próxima etapa e antes de qualquer promoção para `main`.
+
+## V2-SPEC 02 - Mercado Base e Qualificação
+
+O Mercado Base V2 oferece cadastro rápido, edição do mesmo Contact, qualificação estruturada, busca e filtros combináveis. Configurações passa a separar Parâmetros comerciais e Marca da corretora. Os valores da aba Matriz são dados iniciais editáveis por tenant, persistidos em repositories próprios. HOT40 continua exigindo qualificação válida, sem score automático.
+
+Status: implementada, aguardando Human Validation. Base aprovada da V2-SPEC 01: `6eaa2987ec8c23e7199e76172aad5b223ed180b2`. Branch: `v2/commercial-domain`. Confira o roteiro em `docs/specs/V2_SPEC_02_MARKET_BASE_QUALIFICATION_PARAMETERS.md`. V2-SPEC 03 não iniciada.
+
+Verificação: `npm test`, `npm run typecheck`, `npm run lint`, `NEXT_PUBLIC_DOMAIN_MODE=commercial-v2 npm run build` e `git diff --check`.

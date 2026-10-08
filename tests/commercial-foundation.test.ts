@@ -1,4 +1,5 @@
 import "fake-indexeddb/auto";
+import { qualifyFully } from "./commercial-fixture";
 import test, { beforeEach, afterEach } from "node:test";
 import assert from "node:assert/strict";
 import { selectDatabase, getDatabase } from "@/repositories/local/database";
@@ -37,7 +38,7 @@ test("repositories block direct HOT40 create, update and Contact stage bypass", 
 });
 
 test("qualified contact enters once; concurrent repository entries cannot duplicate HOT40", async () => {
-  const person = await contact(); await qualifyContact(person.id, "qualified");
+  const person = await contact(); await qualifyFully(person.id);
   const p = getRepositoryProvider();
   const make = (): Hot40Membership => ({ ...timestamps(), tenantId: person.tenantId, contactId: person.id, enteredAt: new Date().toISOString(), status: "active" });
   const result = await Promise.allSettled([p.hot40Memberships.create(make()), p.hot40Memberships.create(make())]);
@@ -49,7 +50,7 @@ test("qualified contact enters once; concurrent repository entries cannot duplic
 });
 
 test("requalification removes active HOT40 participation and returns person to Mercado Base atomically", async () => {
-  const person = await contact(); await qualifyContact(person.id, "qualified"); await addToHot40(person.id);
+  const person = await contact(); await qualifyFully(person.id); await addToHot40(person.id);
   const p = getRepositoryProvider(); const qualification = (await p.prospectQualifications.list(person.tenantId))[0];
   await p.prospectQualifications.update({ ...qualification, status: "not_qualified" });
   assert.equal((await p.contacts.findById(person.id))?.commercialStage, "market_base");
@@ -60,7 +61,7 @@ test("requalification removes active HOT40 participation and returns person to M
 test("qualification from another tenant or deleted qualification cannot authorize HOT40", async () => {
   const person = await contact(); const p = getRepositoryProvider();
   await assert.rejects(p.prospectQualifications.create({ ...timestamps(), tenantId: "other", contactId: person.id, status: "qualified" }), /contexto/);
-  const qualification = await qualifyContact(person.id, "qualified"); await p.prospectQualifications.delete(qualification.id);
+  const qualification = await qualifyFully(person.id); await p.prospectQualifications.delete(qualification.id);
   await assert.rejects(addToHot40(person.id), /Qualifique/);
 });
 

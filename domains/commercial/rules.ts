@@ -1,8 +1,10 @@
 import type { CommercialActivity, Contact, ProspectQualification } from "@/domains/core/entities";
 
+import { isValidQualification } from "./qualification";
+
 export function assertHot40Qualified(contact: Contact | null | undefined, qualifications: ProspectQualification[], tenantId: string) {
   if (!contact || contact.deletedAt || contact.tenantId !== tenantId) throw new Error("Contato não encontrado no contexto atual.");
-  if (!qualifications.some((item) => item.contactId === contact.id && item.tenantId === tenantId && !item.deletedAt && item.status === "qualified")) {
+  if (!qualifications.some((item) => item.contactId === contact.id && item.tenantId === tenantId && isValidQualification(item))) {
     throw new Error("Qualifique o contato antes de adicioná-lo ao HOT40.");
   }
 }
