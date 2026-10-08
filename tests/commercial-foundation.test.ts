@@ -101,3 +101,19 @@ test("previous inconsistent HOT40 records are repaired without deleting history"
   await commercialOverview();
   assert.equal((await db.contacts.get(person.id))?.version, version);
 });
+
+test("HOT40 movement preserves Contact and writes stage history atomically", async () => {
+  const person = await contact(); await qualifyFully(person.id); const member = await addToHot40(person.id);
+  const { moveHot40Stage } = await import("@/application/commercial-service");
+  const p = getRepositoryProvider();
+  await moveHot40Stage(person.id, "approach_scheduled", "Agendada com cliente");
+  assert.equal((await p.hot40Memberships.findById(member.id))?.stage, "approach_scheduled");
+  assert.equal((await p.contacts.list(person.tenantId)).length, 1);
+  const events = await p.hot40StageEvents.list(person.tenantId);
+  assert.equal(events.length, 2);
+  assert.equal(events[1].fromStage, "ab_phone");
+  assert.equal(events[1].toStage, "approach_scheduled");
+  assert.equal(await moveHot40Stage(person.id, "approach_scheduled"), null);
+  assert.equal((await p.hot40StageEvents.list(person.tenantId)).length, 2);
+  await assert.rejects(moveHot40Stage(person.id, "invalid" as "proposal"), /inválida/);
+});

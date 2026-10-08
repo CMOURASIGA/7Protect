@@ -1,5 +1,5 @@
 "use client";
-import type { Contact, Hot40Membership, ProspectQualification, CommercialActivity, CommercialParameter } from "@/domains/core/entities";
+import type { Contact, Hot40Membership, ProspectQualification, CommercialActivity, CommercialParameter, Hot40Stage, Hot40StageEvent } from "@/domains/core/entities";
 import { COMMERCIAL_PARAMETER_GROUPS } from "@/domains/core/entities";
 import { validateQualification, isValidQualification } from "@/domains/commercial/qualification";
 import matrixDefaults from "@/domains/commercial/matrix-defaults.json";
@@ -30,7 +30,7 @@ export class Hot40Repository extends IndexedDbRepository<Hot40Membership> {
   constructor(private db: ProtectDatabase) { super(db.hot40Memberships); }
   // Non-destructive repair of inconsistent links created before the qualification guard.
   reconcileQualification(tenantId: string) {
-    return this.db.transaction("rw", [this.db.contacts, this.db.prospectQualifications, this.db.hot40Memberships], async () => {
+    return this.db.transaction("rw", [this.db.contacts, this.db.prospectQualifications, this.db.hot40Memberships, this.db.hot40StageEvents], async () => {
       const contacts = await this.db.contacts.where("tenantId").equals(tenantId).toArray();
       const qualifications = await this.db.prospectQualifications.where("tenantId").equals(tenantId).toArray();
       const memberships = await this.db.hot40Memberships.where("tenantId").equals(tenantId).toArray();
@@ -44,7 +44,7 @@ export class Hot40Repository extends IndexedDbRepository<Hot40Membership> {
     });
   }
   private write(input: Hot40Membership, update: boolean) {
-    return this.db.transaction("rw", [this.db.contacts, this.db.prospectQualifications, this.db.hot40Memberships], async () => {
+    return this.db.transaction("rw", [this.db.contacts, this.db.prospectQualifications, this.db.hot40Memberships, this.db.hot40StageEvents], async () => {
       const contact = await this.db.contacts.get(input.contactId);
       if (!contact || contact.deletedAt || contact.tenantId !== input.tenantId) throw new Error("Contato não encontrado no contexto atual.");
       if (!input.deletedAt && input.status !== "removed") {
@@ -54,6 +54,7 @@ export class Hot40Repository extends IndexedDbRepository<Hot40Membership> {
         if (memberships.some((item) => item.id !== input.id && item.tenantId === input.tenantId && live(item))) throw new Error("O contato já participa do HOT40.");
       }
       const result = update ? await super.update(input) : await super.create(input);
+      if (!update && live(input)) await this.db.hot40StageEvents.add({ ...timestamps(), tenantId: input.tenantId, contactId: input.contactId, membershipId: input.id, toStage: input.stage || "ab_phone", occurredAt: input.enteredAt, notes: "Entrada no HOT40" });
       if (live(input)) await this.db.contacts.put(revised({ ...contact, commercialStage: "hot40" as const }));
       return result;
     });
@@ -125,4 +126,23 @@ export class ParameterRepository extends IndexedDbRepository<CommercialParameter
   override create(input: CommercialParameter) { return this.write(input, false); }
   override update(input: CommercialParameter) { return this.write(input, true); }
   override async delete(id: string) { const input = await this.findById(id); if (input) await this.update({ ...input, active: false }); }
+}
+
+export class Hot40StageRepository extends IndexedDbRepository<Hot40StageEvent> {
+  constructor(private db: ProtectDatabase) { super(db.hot40StageEvents); }
+  async move(contactId: string, tenantId: string, toStage: Hot40Stage, notes?: string) {
+    return this.db.transaction("rw", [this.db.contacts, this.db.hot40Memberships, this.db.hot40StageEvents], async () => {
+      const contact = await this.db.contacts.get(contactId);
+      const memberships = await this.db.hot40Memberships.where("contactId").equals(contactId).toArray();
+      const member = memberships.find((row) => row.tenantId === tenantId && row.status === "active" && !row.deletedAt);
+      if (!contact || contact.tenantId !== tenantId || contact.deletedAt || contact.commercialStage !== "hot40" || !member) throw new Error("Contato não está ativo no HOT40.");
+      const fromStage = member.stage || "ab_phone";
+      if (fromStage === toStage) return null;
+      const occurredAt = new Date().toISOString();
+      const event: Hot40StageEvent = { ...timestamps(), tenantId, contactId, membershipId: member.id, fromStage, toStage, occurredAt, notes: notes?.trim() || undefined };
+      await this.db.hot40Memberships.put(revised({ ...member, stage: toStage, stageChangedAt: occurredAt }));
+      await this.db.hot40StageEvents.add(event);
+      return event;
+    });
+  }
 }

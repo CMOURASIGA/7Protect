@@ -129,3 +129,7 @@ O Mercado Base V2 oferece cadastro rápido, edição do mesmo Contact, qualifica
 Status: implementada, aguardando Human Validation. Base aprovada da V2-SPEC 01: `6eaa2987ec8c23e7199e76172aad5b223ed180b2`. Branch: `v2/commercial-domain`. Confira o roteiro em `docs/specs/V2_SPEC_02_MARKET_BASE_QUALIFICATION_PARAMETERS.md`. V2-SPEC 03 não iniciada.
 
 Verificação: `npm test`, `npm run typecheck`, `npm run lint`, `NEXT_PUBLIC_DOMAIN_MODE=commercial-v2 npm run build` e `git diff --check`.
+
+## V2-SPEC 03 - HOT40 operacional
+
+Lista e Kanban usam os mesmos Contacts e memberships. Etapas e atividades geram timeline por contato; próxima ação, última interação e tempo parado são derivados dos eventos. Implementada em `v2/commercial-domain`, pendente de Human Validation. Roteiro: `docs/specs/V2_SPEC_03_HOT40_KANBAN_ACTIVITIES.md`.
