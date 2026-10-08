@@ -79,6 +79,7 @@ export type Hot40StageEvent = EntityMetadata & { contactId: string; membershipId
 export type CommercialActivity = EntityMetadata & { contactId: string; type: CommercialActivityType; status: CommercialActivityStatus; scheduledAt?: string; completedAt?: string; notes?: string; createdBy?: string };
 export type CommercialOpportunity = EntityMetadata & { contactId: string; title: string; status: "open" | "won" | "lost"; source?: string; expectedAt?: string; notes?: string };
 export type CommercialGoal = EntityMetadata & { name: string; target: number; periodStart: string; periodEnd: string; status: "active" | "closed"; notes?: string };
+export type CommercialBenchmark = EntityMetadata & { year: number; month: number; activityType: CommercialActivityType; weeklyTarget: number; monthlyTarget: number };
 export type Referral = EntityMetadata & { contactId: string; referredContactId?: string; status: "new" | "contacted" | "converted" | "discarded"; notes?: string };
 export type Notification = EntityMetadata & { contactId?: string; title: string; message: string; type: "info" | "warning" | "success"; status: "unread" | "read"; readAt?: string };
 

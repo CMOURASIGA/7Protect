@@ -133,3 +133,7 @@ Verificação: `npm test`, `npm run typecheck`, `npm run lint`, `NEXT_PUBLIC_DOM
 ## V2-SPEC 03 - HOT40 operacional
 
 Lista e Kanban usam os mesmos Contacts e memberships. Etapas e atividades geram timeline por contato; próxima ação, última interação e tempo parado são derivados dos eventos. Implementada em `v2/commercial-domain`, pendente de Human Validation. Roteiro: `docs/specs/V2_SPEC_03_HOT40_KANBAN_ACTIVITIES.md`.
+
+## V2-SPEC 04 - Indicadores comerciais
+
+O Dashboard V2 organiza Visão do Mês, Visão Semanal, Funil e Performance. Benchmarks por período são configuráveis; resultados e conversões são derivados de atividades comerciais. O roteiro de validação está em `docs/specs/V2_SPEC_04_DASHBOARD_INDICATORS_BENCHMARK_FUNNEL.md`. Pendente de Human Validation.

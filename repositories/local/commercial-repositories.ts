@@ -1,6 +1,6 @@
 "use client";
-import type { Contact, Hot40Membership, ProspectQualification, CommercialActivity, CommercialParameter, Hot40Stage, Hot40StageEvent } from "@/domains/core/entities";
-import { COMMERCIAL_PARAMETER_GROUPS } from "@/domains/core/entities";
+import type { Contact, Hot40Membership, ProspectQualification, CommercialActivity, CommercialParameter, Hot40Stage, Hot40StageEvent, CommercialBenchmark } from "@/domains/core/entities";
+import { COMMERCIAL_PARAMETER_GROUPS, COMMERCIAL_ACTIVITY_TYPES } from "@/domains/core/entities";
 import { validateQualification, isValidQualification } from "@/domains/commercial/qualification";
 import matrixDefaults from "@/domains/commercial/matrix-defaults.json";
 import { timestamps } from "@/domains/shared/entity";
@@ -145,4 +145,20 @@ export class Hot40StageRepository extends IndexedDbRepository<Hot40StageEvent> {
       return event;
     });
   }
+}
+
+export class BenchmarkRepository extends IndexedDbRepository<CommercialBenchmark> {
+  constructor(private db: ProtectDatabase) { super(db.commercialBenchmarks); }
+  private write(input: CommercialBenchmark, update: boolean) {
+    return this.db.transaction("rw", this.db.commercialBenchmarks, async () => {
+      if (!Number.isInteger(input.year) || input.year < 2000 || input.year > 2100 || !Number.isInteger(input.month) || input.month < 1 || input.month > 12 ||
+        !COMMERCIAL_ACTIVITY_TYPES.includes(input.activityType) || !Number.isInteger(input.weeklyTarget) || input.weeklyTarget < 0 || !Number.isInteger(input.monthlyTarget) || input.monthlyTarget < 0) throw new Error("Informe período e benchmarks inteiros não negativos.");
+      const existing = await this.db.commercialBenchmarks.where("[tenantId+year+month+activityType]").equals([input.tenantId, input.year, input.month, input.activityType]).toArray();
+      if (existing.some((item) => item.id !== input.id && !item.deletedAt)) throw new Error("Já existe benchmark para esta atividade e período.");
+      if (update) { const current = await this.findById(input.id); if (!current || current.tenantId !== input.tenantId) throw new Error("Benchmark não encontrado."); }
+      return update ? super.update(input) : super.create(input);
+    });
+  }
+  override create(input: CommercialBenchmark) { return this.write(input, false); }
+  override update(input: CommercialBenchmark) { return this.write(input, true); }
 }
