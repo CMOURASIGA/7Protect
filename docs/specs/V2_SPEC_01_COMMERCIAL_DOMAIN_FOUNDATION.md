@@ -32,3 +32,24 @@ Com `NEXT_PUBLIC_DEMO_MODE=true` e V2 ativa, o ambiente recebe somente uma base 
 6. Definir o modo como `legacy` e confirmar que o 7Protect anterior continua abrindo.
 
 Não iniciar a V2-SPEC 02 antes da aprovação humana desta base.
+
+## Checkpoint de revisão da fundação, 08/10/2026
+
+- Qualificar não inclui automaticamente no HOT40. A inclusão é uma ação explícita e preserva o Contact.
+- Requalificação atualiza a entidade vinculada. A conversão em cliente marca a participação HOT40 como convertida.
+- Serviços verificam contato, tenant, soft-delete, tipo, status e data da atividade antes de persistir.
+- Datas são normalizadas para ISO. Relatórios usam calendário America/Sao_Paulo; ano civil e ano ISO da semana são separados.
+- Agregadores cobrem tipo, status, semana, mês, ano, origem e consultor. Conversões contam pessoas distintas presentes nas duas etapas realizadas. Base vazia retorna percentual nulo, nunca uma conversão inventada.
+- Formulários preservam conteúdo após erro, exibem a mensagem e bloqueiam envio durante a gravação.
+- O carregamento comercial aguarda a configuração da corretora. Demo V2 começa somente com tenant/identidade e seed comercial mínimo, sem popular o domínio legado.
+- Testes críticos: `node --test tests/commercial-aggregations.test.mjs` (Node 24).
+
+### Alternância para homologação
+
+`NEXT_PUBLIC_DOMAIN_MODE=commercial-v2` ativa a V2. `legacy` (ou ausência) preserva a experiência anterior. A alteração requer novo build/deploy; não é uma migração de dados. No Vercel, o override fica restrito ao Preview da branch `v2/commercial-domain`.
+
+A SPEC permanece aguardando Human Validation. A V2-SPEC 02 não foi iniciada.
+
+### Evidências e limites da revisão
+
+Typecheck, lint (zero erros, cinco avisos preexistentes), build V2 e os três testes de agregação passaram. A checagem automatizada de navegador não executou: Chromium ausente e download bloqueado/truncado neste ambiente. Persistência após refresh, responsividade e a alternância funcional entre V2 e legacy devem ser confirmadas na Human Validation do Preview. Não registrar esses itens como homologados antes da validação.
