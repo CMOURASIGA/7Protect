@@ -53,3 +53,14 @@ A SPEC permanece aguardando Human Validation. A V2-SPEC 02 não foi iniciada.
 ### Evidências e limites da revisão
 
 Typecheck, lint (zero erros, cinco avisos preexistentes), build V2 e os três testes de agregação passaram. A checagem automatizada de navegador não executou: Chromium ausente e download bloqueado/truncado neste ambiente. Persistência após refresh, responsividade e a alternância funcional entre V2 e legacy devem ser confirmadas na Human Validation do Preview. Não registrar esses itens como homologados antes da validação.
+
+## Correções finais da Human Validation, 08/10/2026
+
+- Entrada no HOT40 exige qualificação `qualified` no mesmo tenant. Pendentes e não qualificados não recebem o botão e são bloqueados no service e nos repositories de Contact/HOT40.
+- Repositories comerciais especializados validam dentro de transações IndexedDB. A criação concorrente de duas participações ativas é bloqueada.
+- Requalificação para pendente/não qualificado ou exclusão da qualificação encerra a participação e devolve contatos HOT40 ao Mercado Base, preservando os registros como histórico removido.
+- Ao carregar a visão comercial, vínculos inconsistentes criados pela versão anterior são corrigidos de forma transacional e idempotente, sem exclusão de histórico.
+- Drawer: Planejada mostra `Data agendada` e grava `scheduledAt`; Realizada mostra `Data realizada` e grava `completedAt`. Atividades realizadas podem preservar um agendamento anterior como histórico, mas agrupamento, ordenação e exibição utilizam `completedAt`.
+- Planejada não aceita data realizada. Realizada exige data realizada, inclusive na chamada direta ao repository. Semana, mês e ano continuam derivados.
+- Suíte `npm test`: testes de service/repository com IndexedDB em memória, concorrência, isolamento de tenant, qualificação excluída, reparo de registros anteriores e semântica de datas, além dos testes existentes de agregação.
+- V2-SPEC 02 permanece não iniciada. A aprovação humana continua pendente deste checkpoint.
