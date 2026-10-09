@@ -1,5 +1,5 @@
 "use client";
-import type { Contact, Hot40Membership, ProspectQualification, CommercialActivity, CommercialParameter, Hot40Stage, Hot40StageEvent, CommercialBenchmark } from "@/domains/core/entities";
+import type { Contact, Hot40Membership, ProspectQualification, CommercialActivity, CommercialParameter, Hot40Stage, Hot40StageEvent, CommercialBenchmark, ActivityCycleEvent, Notification } from "@/domains/core/entities";
 import { COMMERCIAL_PARAMETER_GROUPS, COMMERCIAL_ACTIVITY_TYPES } from "@/domains/core/entities";
 import { validateQualification, isValidQualification } from "@/domains/commercial/qualification";
 import matrixDefaults from "@/domains/commercial/matrix-defaults.json";
@@ -94,11 +94,73 @@ export class ActivityRepository extends IndexedDbRepository<CommercialActivity> 
       const contact = await this.db.contacts.get(input.contactId);
       if (!contact || contact.deletedAt || contact.tenantId !== input.tenantId) throw new Error("Contato não encontrado no contexto atual.");
       assertActivityDate(input);
+      if (!update && input.status === "cancelled") throw new Error("Cancele uma atividade planejada existente.");
+      if (update) {
+        const current = await this.db.commercialActivities.get(input.id);
+        if (!current || current.tenantId !== input.tenantId) throw new Error("Atividade não encontrada.");
+        if (current.status !== input.status || current.scheduledAt !== input.scheduledAt || current.completedAt !== input.completedAt) throw new Error("Use um comando de ciclo para concluir, cancelar ou reagendar.");
+      }
       return update ? super.update(input) : super.create(input);
     });
   }
   override create(input: CommercialActivity) { return this.write(input, false); }
   override update(input: CommercialActivity) { return this.write(input, true); }
+  transition(input: { tenantId: string; activityId: string; expectedVersion: number; commandKey: string; action: ActivityCycleEvent["action"]; at?: string; reason?: string }) {
+    return this.db.transaction("rw", [this.db.commercialActivities, this.db.activityCycleEvents], async () => {
+      if (!input.commandKey.trim()) throw new Error("Identificador do comando obrigatório.");
+      const prior = await this.db.activityCycleEvents.where("[tenantId+commandKey]").equals([input.tenantId, input.commandKey]).first();
+      if (prior) {
+        if (prior.activityId !== input.activityId || prior.action !== input.action) throw new Error("Chave de comando já utilizada em outra ação.");
+        const latest = (await this.db.commercialActivities.get(input.activityId))!;
+        return { activity: { ...latest, status: prior.action === "complete" ? "completed" as const : prior.action === "cancel" ? "cancelled" as const : "planned" as const, scheduledAt: prior.scheduledAt, completedAt: prior.completedAt, version: prior.resultVersion }, event: prior };
+      }
+      const current = await this.db.commercialActivities.get(input.activityId);
+      if (!current || current.deletedAt || current.tenantId !== input.tenantId) throw new Error("Atividade não encontrada.");
+      if (current.version !== input.expectedVersion) throw new Error("Atividade alterada em outra sessão. Atualize os dados.");
+      if (current.status !== "planned" || !current.scheduledAt) throw new Error("Somente atividade planejada pode ser alterada.");
+      const at = input.at ? new Date(input.at).toISOString() : undefined;
+      if (input.action === "complete" && !at) throw new Error("Informe a data realizada.");
+      if (input.action === "reschedule" && (!at || at === current.scheduledAt || !input.reason?.trim())) throw new Error("Informe nova data e motivo do reagendamento.");
+      if (input.action === "cancel" && !input.reason?.trim()) throw new Error("Informe o motivo do cancelamento.");
+      const occurredAt = new Date().toISOString();
+      const next: CommercialActivity = { ...current, status: input.action === "complete" ? "completed" : input.action === "cancel" ? "cancelled" : "planned", scheduledAt: input.action === "reschedule" ? at : current.scheduledAt, completedAt: input.action === "complete" ? at : undefined, updatedAt: occurredAt, version: current.version + 1 };
+      assertActivityDate(next);
+      const event: ActivityCycleEvent = { ...timestamps(), tenantId: input.tenantId, activityId: current.id, contactId: current.contactId, commandKey: input.commandKey, action: input.action, occurredAt, previousScheduledAt: current.scheduledAt, scheduledAt: next.scheduledAt!, completedAt: next.completedAt, resultVersion: next.version, reason: input.reason?.trim() };
+      await this.db.commercialActivities.put(next);
+      await this.db.activityCycleEvents.add(event);
+      return { activity: next, event };
+    });
+  }
+}
+
+export class AttentionNotificationRepository extends IndexedDbRepository<Notification> {
+  constructor(private db: ProtectDatabase) { super(db.notifications); }
+  async reconcile(tenantId: string, desired: Notification[]) {
+    return this.db.transaction("rw", this.db.notifications, async () => {
+      const existing = await this.db.notifications.where("tenantId").equals(tenantId).toArray();
+      const active = new Map(desired.map((item) => [item.causeKey!, item]));
+      for (const item of existing.filter((row) => row.causeKey && !row.deletedAt)) {
+        const candidate = active.get(item.causeKey!);
+        if (!candidate) {
+          if (item.status !== "resolved") await this.db.notifications.put({ ...item, status: "resolved", resolvedAt: new Date().toISOString(), updatedAt: new Date().toISOString(), version: item.version + 1 });
+        } else {
+          active.delete(item.causeKey!);
+          if (item.status === "resolved" || item.title !== candidate.title || item.message !== candidate.message || item.severity !== candidate.severity) await this.db.notifications.put({ ...item, title: candidate.title, message: candidate.message, severity: candidate.severity, status: item.status === "resolved" ? "unread" : item.status, readAt: item.status === "resolved" ? undefined : item.readAt, resolvedAt: undefined, updatedAt: new Date().toISOString(), version: item.version + 1 });
+        }
+      }
+      for (const candidate of active.values()) await this.db.notifications.add(candidate);
+      return this.list(tenantId);
+    });
+  }
+  async markRead(tenantId: string, id: string) {
+    return this.db.transaction("rw", this.db.notifications, async () => {
+      const row = await this.db.notifications.get(id);
+      if (!row || row.tenantId !== tenantId || row.deletedAt) throw new Error("Notificação não encontrada.");
+      if (row.status !== "unread") return row;
+      const next: Notification = { ...row, status: "read", readAt: new Date().toISOString(), updatedAt: new Date().toISOString(), version: row.version + 1 };
+      await this.db.notifications.put(next); return next;
+    });
+  }
 }
 
 

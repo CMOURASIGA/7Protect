@@ -35,6 +35,18 @@ export function commercialActivityMonthWeek(value?: string) {
   if (!parts) return null;
   return commercialMonthWeek(parts.day);
 }
+export function commercialLocalDateTimeToIso(value: string) {
+  if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(value)) return new Date(value).toISOString();
+  const [year, month, day, hour, minute] = value.match(/\d+/g)!.map(Number);
+  const probe = new Date(Date.UTC(year, month - 1, day, 12));
+  const parts = new Intl.DateTimeFormat("en-US", { timeZone: "America/Sao_Paulo", year: "numeric", month: "numeric", day: "numeric", hour: "numeric", minute: "numeric", hourCycle: "h23" }).formatToParts(probe);
+  const part = (name: string) => Number(parts.find((item) => item.type === name)?.value);
+  const offset = Date.UTC(part("year"), part("month") - 1, part("day"), part("hour"), part("minute")) - probe.getTime();
+  const result = new Date(Date.UTC(year, month - 1, day, hour, minute) - offset);
+  const local = commercialDateParts(result.toISOString());
+  if (!local || local.year !== year || local.month !== month || local.day !== day) throw new Error("Data comercial inválida.");
+  return result.toISOString();
+}
 export function groupCommercialActivities(activities: CommercialActivity[], granularity: "week" | "month" | "year") {
   return activities.reduce<Record<string, CommercialActivity[]>>((groups, activity) => {
     if (activity.deletedAt) return groups;

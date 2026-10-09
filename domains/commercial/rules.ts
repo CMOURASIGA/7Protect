@@ -12,6 +12,7 @@ export function assertHot40Qualified(contact: Contact | null | undefined, qualif
 export function assertActivityDate(activity: Pick<CommercialActivity, "status" | "scheduledAt" | "completedAt">) {
   if (activity.status === "planned" && (!activity.scheduledAt || activity.completedAt)) throw new Error("Atividade planejada exige Data agendada e não pode ter Data realizada.");
   if (activity.status === "completed" && !activity.completedAt) throw new Error("Informe a Data realizada.");
+  if (activity.status === "cancelled" && (!activity.scheduledAt || activity.completedAt)) throw new Error("Atividade cancelada preserva Data agendada e não possui Data realizada.");
   if (!activity.scheduledAt && !activity.completedAt) throw new Error("Informe a data da atividade.");
   for (const value of [activity.scheduledAt, activity.completedAt]) {
     if (value && Number.isNaN(new Date(value).getTime())) throw new Error("Data de atividade inválida.");

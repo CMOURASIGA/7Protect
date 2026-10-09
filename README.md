@@ -137,3 +137,7 @@ Lista e Kanban usam os mesmos Contacts e memberships. Etapas e atividades geram 
 ## V2-SPEC 04 - Indicadores comerciais
 
 O Dashboard V2 organiza Visão do Mês, Visão Semanal, Funil e Performance. Benchmarks por período são configuráveis; resultados e conversões são derivados de atividades comerciais. O roteiro de validação está em `docs/specs/V2_SPEC_04_DASHBOARD_INDICATORS_BENCHMARK_FUNNEL.md`. Pendente de Human Validation.
+
+### Domínio Comercial V2, SPEC 05
+
+A Agenda operacional em `/agenda` reúne Hoje, Atrasadas, Próximas e HOT40 sem próxima ação. O Dashboard exibe a Central de atenção. Atividades planejadas são concluídas, canceladas ou reagendadas no mesmo registro, com evento de ciclo e comando idempotente. Alertas são calculados de atividades, HOT40, benchmark semanal e funil, com notificações internas rastreáveis. Limites ficam em Configurações > Alertas. Consulte `docs/specs/V2_SPEC_05_OPERATIONAL_AGENDA_ALERTS_NOTIFICATIONS_PREPARATION.md` para regras e Human Validation.

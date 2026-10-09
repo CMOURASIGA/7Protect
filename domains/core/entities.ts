@@ -77,11 +77,13 @@ export const HOT40_STAGES = ["ab_phone", "approach_scheduled", "approach_complet
 export type Hot40Stage = (typeof HOT40_STAGES)[number];
 export type Hot40StageEvent = EntityMetadata & { contactId: string; membershipId: string; fromStage?: Hot40Stage; toStage: Hot40Stage; occurredAt: string; notes?: string };
 export type CommercialActivity = EntityMetadata & { contactId: string; type: CommercialActivityType; status: CommercialActivityStatus; scheduledAt?: string; completedAt?: string; notes?: string; createdBy?: string };
+export type ActivityCycleEvent = EntityMetadata & { activityId: string; contactId: string; commandKey: string; action: "complete" | "cancel" | "reschedule"; occurredAt: string; previousScheduledAt: string; scheduledAt: string; completedAt?: string; resultVersion: number; reason?: string };
 export type CommercialOpportunity = EntityMetadata & { contactId: string; title: string; status: "open" | "won" | "lost"; source?: string; expectedAt?: string; notes?: string };
 export type CommercialGoal = EntityMetadata & { name: string; target: number; periodStart: string; periodEnd: string; status: "active" | "closed"; notes?: string };
 export type CommercialBenchmark = EntityMetadata & { year: number; month: number; activityType: CommercialActivityType; weeklyTargets?: [number, number, number, number, number]; legacyWeeklyTarget?: number; legacyMonthlyTarget?: number };
 export type Referral = EntityMetadata & { contactId: string; referredContactId?: string; status: "new" | "contacted" | "converted" | "discarded"; notes?: string };
-export type Notification = EntityMetadata & { contactId?: string; title: string; message: string; type: "info" | "warning" | "success"; status: "unread" | "read"; readAt?: string };
+export type Notification = EntityMetadata & { contactId?: string; title: string; message: string; type: "overdue" | "no_next_action" | "stalled" | "weekly_gap" | "bottleneck" | "info" | "warning" | "success"; severity?: "info" | "attention" | "critical"; status: "unread" | "read" | "resolved"; readAt?: string; resolvedAt?: string; sourceType?: string; sourceId?: string; occurrenceKey?: string; causeKey?: string };
+export type CommercialAttentionPolicy = EntityMetadata & { stalledDays: number; criticalStalledDays: number; criticalOverdueHours: number; funnelMinimumContacts: number; funnelMaximumConversion: number };
 
 export const COMMERCIAL_PARAMETER_GROUPS = ["source", "income_band", "age_range", "marital_status", "children", "contact_frequency", "approach_ease", "referral_potential"] as const;
 export type CommercialParameterGroup = (typeof COMMERCIAL_PARAMETER_GROUPS)[number];

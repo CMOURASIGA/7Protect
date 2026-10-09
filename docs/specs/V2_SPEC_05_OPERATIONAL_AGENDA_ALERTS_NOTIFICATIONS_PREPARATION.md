@@ -1,8 +1,8 @@
 # V2-SPEC 05 - Agenda Operacional, Alertas e Notificações
 
-Status: AUTHORIZED FOR PREPARATION. Base homologada: `f6b7f6d7c03ff5fc6554ee0d307d3300619d9539`. Branch: `v2/commercial-domain`.
+Status: READY FOR HUMAN VALIDATION. Base homologada: `f6b7f6d7c03ff5fc6554ee0d307d3300619d9539`. Branch: `v2/commercial-domain`.
 
-Este documento fecha o recorte funcional e os contratos para revisão. Não implementa a SPEC 05 nem autoriza iniciar a SPEC 06.
+Este documento registra o recorte funcional aprovado, a implementação da SPEC 05 e o roteiro de validação. A SPEC 06 permanece bloqueada.
 
 ## 1. Contratos existentes e lacunas
 
@@ -76,4 +76,14 @@ Roteiro humano: criar planejada para hoje, futura e vencida; conferir as quatro 
 
 ## 8. Gate
 
-A implementação funcional começa após revisão deste recorte. A V2-SPEC 06 depende de Human Validation e aprovação explícita da V2-SPEC 05.
+A V2-SPEC 06 depende de Human Validation e aprovação explícita da V2-SPEC 05.
+
+## Implementação da SPEC 05
+
+Status funcional: READY FOR HUMAN VALIDATION. A preparação acima foi implementada na branch `v2/commercial-domain`. A V2-SPEC 06 permanece bloqueada.
+
+- A Agenda é a rota `/agenda`; a Central aparece no Dashboard e na Agenda. A configuração de limites fica em Configurações > Alertas. Ações no HOT40 e na Agenda usam o mesmo Contact e a mesma atividade.
+- Comandos de ciclo recebem `commandKey`, `expectedVersion` e são persistidos junto com `ActivityCycleEvent` na transação Dexie. O evento mantém data anterior, data resultante, motivo, horário e versão resultante. Repetir uma chave devolve o resultado lógico original mesmo depois de uma transição posterior; uma chave reutilizada para outra ação é rejeitada.
+- O schema Dexie v11 adiciona `activityCycleEvents`, `commercialAttentionPolicies` e índice composto para `Notification.causeKey`. Notificações preexistentes preservam id, conteúdo e status; recebem severidade informativa quando ausente e não ganham referência inventada. Somente novas causas da SPEC 05 entram na reconciliação.
+- A semana proporcional usa o calendário comercial de São Paulo, com início inclusivo e fim exclusivo. A Central mostra atividade vencida antes da indicação sem próxima ação do mesmo Contact; ambas as causas continuam rastreáveis. Ao concluir a vencida, a indicação sem próxima ação passa a aparecer.
+- Na Agenda do ambiente de demonstração, clicar em `Preparar cenário de validação`. O comando idempotente cria uma planejada vencida há dois dias para o primeiro HOT40, uma para hoje às 23h30 e outra para daqui a dois dias para o segundo. Não repete atividades com os marcadores de validação nem toca em metas. Atualizar, marcar a notificação lida, concluir ou reagendar a vencida e conferir resolução. Para HOT40 parado, registrar interação realizada com data anterior ao limite configurado e ajustar o limite em Configurações > Alertas se necessário. Os dados de produção não são sobrescritos.
