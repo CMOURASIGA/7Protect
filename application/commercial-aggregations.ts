@@ -1,6 +1,6 @@
 import type { CommercialActivity, Contact } from "@/domains/core/entities";
 
-export type CommercialDateParts = { week: number; weekYear: number; month: number; year: number; period: string };
+export type CommercialDateParts = { day: number; week: number; weekYear: number; month: number; year: number; period: string };
 
 // Commercial reporting uses the operation's calendar, independently of the device timezone.
 export function commercialDateParts(value?: string): CommercialDateParts | null {
@@ -16,11 +16,24 @@ export function commercialDateParts(value?: string): CommercialDateParts | null 
   const weekYear = utc.getUTCFullYear();
   const yearStart = new Date(Date.UTC(weekYear, 0, 1));
   const week = Math.ceil((((utc.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
-  return { week, weekYear, month, year, period: `${year}-${String(month).padStart(2, "0")}` };
+  return { day: part("day"), week, weekYear, month, year, period: `${year}-${String(month).padStart(2, "0")}` };
 }
 
 export function activityDate(activity: CommercialActivity) {
   return activity.status === "completed" ? activity.completedAt : activity.scheduledAt;
+}
+
+// The commercial month always has five slots: days 1-7, 8-14, 15-21, 22-28, 29-end.
+// Keep this rule in the domain application layer for reporting, targets and future alerts.
+export function commercialMonthWeek(day: number): 1 | 2 | 3 | 4 | 5 {
+  if (!Number.isInteger(day) || day < 1 || day > 31) throw new Error("Dia comercial inválido.");
+  return Math.min(5, Math.ceil(day / 7)) as 1 | 2 | 3 | 4 | 5;
+}
+
+export function commercialActivityMonthWeek(value?: string) {
+  const parts = commercialDateParts(value);
+  if (!parts) return null;
+  return commercialMonthWeek(parts.day);
 }
 export function groupCommercialActivities(activities: CommercialActivity[], granularity: "week" | "month" | "year") {
   return activities.reduce<Record<string, CommercialActivity[]>>((groups, activity) => {

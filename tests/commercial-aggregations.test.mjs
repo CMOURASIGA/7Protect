@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { commercialDateParts, aggregateCommercialActivities } from '../application/commercial-aggregations.ts';
 const activity = (contactId, type, extra = {}) => ({ contactId, type, tenantId: 'tenant', status: 'completed', completedAt: '2026-12-31T15:00:00Z', ...extra });
 test('calendar year and ISO week year remain separate at year boundaries', () => {
-  assert.deepEqual(commercialDateParts('2021-01-01T15:00:00Z'), { week: 53, weekYear: 2020, month: 1, year: 2021, period: '2021-01' });
+  assert.deepEqual(commercialDateParts('2021-01-01T15:00:00Z'), { day: 1, week: 53, weekYear: 2020, month: 1, year: 2021, period: '2021-01' });
   assert.equal(commercialDateParts('2026-01-01T01:00:00Z').period, '2025-12');
   assert.equal(commercialDateParts('invalid'), null);
 });

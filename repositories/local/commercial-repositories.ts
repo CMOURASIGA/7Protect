@@ -152,7 +152,9 @@ export class BenchmarkRepository extends IndexedDbRepository<CommercialBenchmark
   private write(input: CommercialBenchmark, update: boolean) {
     return this.db.transaction("rw", this.db.commercialBenchmarks, async () => {
       if (!Number.isInteger(input.year) || input.year < 2000 || input.year > 2100 || !Number.isInteger(input.month) || input.month < 1 || input.month > 12 ||
-        !COMMERCIAL_ACTIVITY_TYPES.includes(input.activityType) || !Number.isInteger(input.weeklyTarget) || input.weeklyTarget < 0 || !Number.isInteger(input.monthlyTarget) || input.monthlyTarget < 0) throw new Error("Informe período e benchmarks inteiros não negativos.");
+        !COMMERCIAL_ACTIVITY_TYPES.includes(input.activityType) || !Array.isArray(input.weeklyTargets) || input.weeklyTargets.length !== 5 ||
+        !input.weeklyTargets.every((value) => Number.isSafeInteger(value) && value >= 0) ||
+        !Number.isSafeInteger(input.weeklyTargets.reduce((sum, value) => sum + value, 0))) throw new Error("Informe cinco benchmarks semanais inteiros não negativos.");
       const existing = await this.db.commercialBenchmarks.where("[tenantId+year+month+activityType]").equals([input.tenantId, input.year, input.month, input.activityType]).toArray();
       if (existing.some((item) => item.id !== input.id && !item.deletedAt)) throw new Error("Já existe benchmark para esta atividade e período.");
       if (update) { const current = await this.findById(input.id); if (!current || current.tenantId !== input.tenantId) throw new Error("Benchmark não encontrado."); }
