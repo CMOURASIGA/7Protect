@@ -7,6 +7,7 @@ export const INDICATOR_LABEL: Record<CommercialActivityType, string> = { ab_phon
 export type DashboardFilters = { year: number; month: number; consultant?: string; origin?: string };
 export type IndicatorResult = { type: CommercialActivityType; actual: number; target: number | null; gap: number | null; attainment: number | null; activityIds: string[] };
 export type FunnelStep = { type: CommercialActivityType; contacts: number; converted: number | null; conversion: number | null; contactIds: string[] };
+export type FunnelBottleneck = { type: CommercialActivityType; previousType: CommercialActivityType; denominator: number; converted: number; conversion: number; period: string };
 export const attainment = (actual: number, target: number | null) => target === null || target === 0 ? null : actual / target * 100;
 export const monthlyBenchmark = (benchmark?: CommercialBenchmark) => benchmark?.weeklyTargets ? benchmark.weeklyTargets.reduce((sum, value) => sum + value, 0) : null;
 
@@ -38,6 +39,10 @@ export function commercialDashboard(activities: CommercialActivity[], contacts: 
     return { type, contacts: ids.length, converted, conversion: prior && prior.size ? converted! / prior.size * 100 : null, contactIds: ids };
   });
   const measured = funnel.slice(1).filter((step) => step.conversion !== null);
-  const bottleneck = measured.length ? measured.reduce((lowest, step) => step.conversion! < lowest.conversion! ? step : lowest) : null;
+  const lowest = measured.length ? measured.reduce((candidate, step) => step.conversion! < candidate.conversion! ? step : candidate) : null;
+  const bottleneck: FunnelBottleneck | null = lowest ? (() => {
+    const index = funnel.indexOf(lowest);
+    return { type: lowest.type, previousType: funnel[index - 1].type, denominator: funnel[index - 1].contacts, converted: lowest.converted!, conversion: lowest.conversion!, period: monthKey };
+  })() : null;
   return { monthKey, monthly: result(rows), weekly, funnel, bottleneck, completed: rows.filter((item) => item.status === "completed").length, planned: rows.filter((item) => item.status === "planned").length, contacts: new Set(rows.map((item) => item.contactId)).size, total: rows.length, activities: rows };
 }

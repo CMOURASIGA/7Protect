@@ -8,6 +8,7 @@ import { getRepositoryProvider } from "@/repositories/providers";
 import { commercialWeekInterval, expectedWeeklyProduction, operationalAttention, navigablePlannedActivity, DEFAULT_ATTENTION_POLICY } from "@/application/commercial-attention";
 import { prepareOperationalDemo } from "@/application/operational-service";
 import { commercialLocalDateTimeToIso } from "@/application/commercial-aggregations";
+import { commercialDashboard, INDICATOR_LABEL } from "@/application/commercial-dashboard";
 import type { CommercialActivity, Contact, Hot40Membership, Notification } from "@/domains/core/entities";
 
 const tenantId = "tenant";
@@ -141,6 +142,45 @@ test("navigation resolves only planned activity and Contact from current tenant"
   assert.equal(navigablePlannedActivity(a.id, "other", [a], [c]), null);
   assert.equal(navigablePlannedActivity(a.id, tenantId, [{ ...a, status: "cancelled" }], [c]), null);
   assert.equal(navigablePlannedActivity(a.id, tenantId, [a], [{ ...c, tenantId: "other" }]), null);
+});
+
+test("Dashboard, Central and notification share one bottleneck; reconciliation resolves old stage on change", async () => {
+  const contacts = Array.from({ length: 5 }, contact);
+  const completed = (contactId: string, type: CommercialActivity["type"], completedAt: string): CommercialActivity => ({ ...activity(contactId, completedAt), type, status: "completed", scheduledAt: undefined, completedAt });
+  const firstStage = contacts.map((item) => completed(item.id, "ab_phone", "2026-10-13T12:00:00Z"));
+  const now = "2026-10-13T15:00:00Z";
+  const project = (activities: CommercialActivity[]) => operationalAttention(base(now, contacts, [], activities));
+  const repo = getRepositoryProvider().notifications;
+  const reconcile = async (projection: ReturnType<typeof project>) => repo.reconcile(tenantId, projection.causes.map((cause) => ({ ...timestamps(), ...cause, status: "unread" as const })));
+  const initial = project(firstStage);
+  const dashboardA = commercialDashboard(firstStage, contacts, [], { year: 2026, month: 10 });
+  assert.deepEqual(initial.report.bottleneck, dashboardA.bottleneck);
+  assert.deepEqual(dashboardA.bottleneck, { type: "approach_scheduled", previousType: "ab_phone", denominator: 5, converted: 0, conversion: 0, period: "2026-10" });
+  const causeA = initial.causes.filter((item) => item.type === "bottleneck");
+  assert.equal(causeA.length, 1); assert.equal(causeA[0].sourceId, dashboardA.bottleneck!.type);
+  assert.equal(causeA[0].title, INDICATOR_LABEL[dashboardA.bottleneck!.type]);
+  assert.match(causeA[0].message, /0 de 5 contatos \(0%\)/);
+  await reconcile(initial);
+  const savedA = (await repo.list(tenantId)).find((item) => item.type === "bottleneck")!;
+  assert.equal(savedA.status, "unread"); assert.equal(savedA.sourceId, "approach_scheduled");
+
+  const nextActivities = [...firstStage, ...contacts.map((item) => completed(item.id, "approach_scheduled", "2026-10-13T14:00:00Z"))];
+  const changed = project(nextActivities);
+  const dashboardB = commercialDashboard(nextActivities, contacts, [], { year: 2026, month: 10 });
+  assert.deepEqual(changed.report.bottleneck, dashboardB.bottleneck);
+  assert.deepEqual(dashboardB.bottleneck, { type: "approach_completed", previousType: "approach_scheduled", denominator: 5, converted: 0, conversion: 0, period: "2026-10" });
+  assert.equal(changed.causes.filter((item) => item.type === "bottleneck").length, 1);
+  assert.equal(changed.causes.find((item) => item.type === "bottleneck")?.sourceId, dashboardB.bottleneck!.type);
+  await reconcile(changed);
+  const saved = (await repo.list(tenantId)).filter((item) => item.type === "bottleneck");
+  assert.equal(saved.length, 2);
+  assert.equal(saved.find((item) => item.id === savedA.id)?.status, "resolved");
+  const active = saved.filter((item) => item.status !== "resolved");
+  assert.equal(active.length, 1); assert.equal(active[0].sourceId, "approach_completed");
+  assert.equal(active[0].title, INDICATOR_LABEL[dashboardB.bottleneck!.type]);
+  assert.match(active[0].message, /0 de 5 contatos \(0%\)/);
+  for (let index = 0; index < 5; index++) await reconcile(project(nextActivities));
+  assert.deepEqual((await repo.list(tenantId)).filter((item) => item.type === "bottleneck"), saved);
 });
 
 test("demo preparation creates independent scenarios once and preserves activities, notifications and event IDs", async () => {
