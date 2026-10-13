@@ -1,5 +1,5 @@
 import { COMMERCIAL_ACTIVITY_TYPES } from "@/domains/core/entities";
-import type { CommercialActivity, CommercialActivityType, CommercialBenchmark, Contact } from "@/domains/core/entities";
+import type { CommercialActivity, CommercialActivityType, CommercialBenchmark, Contact, CommercialParameter, ProspectQualification } from "@/domains/core/entities";
 import { activityDate, commercialActivityMonthWeek, commercialDateParts } from "./commercial-aggregations";
 
 export const INDICATOR_TYPES: CommercialActivityType[] = [...COMMERCIAL_ACTIVITY_TYPES];
@@ -9,6 +9,12 @@ export type IndicatorResult = { type: CommercialActivityType; actual: number; ta
 export type FunnelStep = { type: CommercialActivityType; contacts: number; converted: number | null; conversion: number | null; contactIds: string[] };
 export const attainment = (actual: number, target: number | null) => target === null || target === 0 ? null : actual / target * 100;
 export const monthlyBenchmark = (benchmark?: CommercialBenchmark) => benchmark?.weeklyTargets ? benchmark.weeklyTargets.reduce((sum, value) => sum + value, 0) : null;
+
+export function commercialReportingContacts(contacts: Contact[], qualifications: ProspectQualification[], parameters: CommercialParameter[]) {
+  const labels = new Map(parameters.map((item) => [item.id, item.label]));
+  const sources = new Map(qualifications.map((item) => [item.contactId, item.sourceId]));
+  return contacts.map((contact) => ({ ...contact, origin: labels.get(sources.get(contact.id) || "") || contact.origin }));
+}
 
 export function commercialDashboard(activities: CommercialActivity[], contacts: Contact[], benchmarks: CommercialBenchmark[], filters: DashboardFilters) {
   const monthKey = `${filters.year}-${String(filters.month).padStart(2, "0")}`;

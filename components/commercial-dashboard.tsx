@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { commercialOverview } from "@/application/commercial-service";
 import { saveCommercialBenchmark } from "@/application/commercial-benchmark-service";
-import { commercialDashboard, INDICATOR_TYPES, INDICATOR_LABEL, type IndicatorResult } from "@/application/commercial-dashboard";
+import { commercialDashboard, commercialReportingContacts, INDICATOR_TYPES, INDICATOR_LABEL, type IndicatorResult } from "@/application/commercial-dashboard";
 import { commercialDateParts, activityDate } from "@/application/commercial-aggregations";
 import type { CommercialActivityType, CommercialBenchmark } from "@/domains/core/entities";
 import { useFoundation } from "./foundation-provider";
@@ -28,10 +28,9 @@ export function CommercialDashboard() {
   const [tab, setTab] = useState<"month" | "week" | "funnel" | "performance">("month");
   const [editing, setEditing] = useState(false); const [trace, setTrace] = useState<IndicatorResult | null>(null);
   const reload = useCallback(async () => { try { setError(""); setData(await commercialOverview()); } catch (cause) { setError(cause instanceof Error ? cause.message : "Não foi possível carregar os indicadores."); } }, []);
-  useEffect(() => { const view = new URLSearchParams(window.location.search).get("view"); if (view === "week" || view === "funnel") { const timer = window.setTimeout(() => setTab(view), 0); return () => window.clearTimeout(timer); } }, []);
+  useEffect(() => { const query = new URLSearchParams(window.location.search); const view = query.get("view"); const selectedYear = Number(query.get("year")); const selectedMonth = Number(query.get("month")); const timer = window.setTimeout(() => { if (view === "week" || view === "funnel") setTab(view); if (selectedYear >= 2000 && selectedYear <= 2100 && selectedMonth >= 1 && selectedMonth <= 12) { setYear(selectedYear); setMonth(selectedMonth); } }, 0); return () => window.clearTimeout(timer); }, []);
   useEffect(() => { if (ready && settings) { const timer = window.setTimeout(() => { void reload(); }, 0); return () => window.clearTimeout(timer); } }, [ready, settings, reload]);
-  const origins = useMemo(() => { if (!data) return new Map<string, string>(); const labels = new Map(data.parameters.map((item) => [item.id, item.label])); return new Map(data.contacts.map((contact) => [contact.id, labels.get(data.qualifications.find((item) => item.contactId === contact.id)?.sourceId || "") || contact.origin || ""])); }, [data]);
-  const contacts = useMemo(() => data?.contacts.map((item) => ({ ...item, origin: origins.get(item.id) })) || [], [data, origins]);
+  const contacts = useMemo(() => data ? commercialReportingContacts(data.contacts, data.qualifications, data.parameters) : [], [data]);
   const report = useMemo(() => data ? commercialDashboard(data.activities, contacts, data.benchmarks, { year, month, consultant: consultant || undefined, origin: origin || undefined }) : null, [data, contacts, year, month, consultant, origin]);
   const years = [...new Set([now.year - 1, now.year, now.year + 1, ...((data?.activities || []).map((item) => commercialDateParts(activityDate(item))?.year).filter((item): item is number => Boolean(item)))])].sort((a, b) => b - a);
   const options = (values: string[]) => [...new Set(values.filter(Boolean))].sort((a, b) => a.localeCompare(b, "pt-BR"));

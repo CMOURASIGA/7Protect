@@ -1,6 +1,6 @@
 # V2-SPEC 05 - Agenda Operacional, Alertas e Notificações
 
-Status: READY FOR HUMAN VALIDATION. Base homologada: `f6b7f6d7c03ff5fc6554ee0d307d3300619d9539`. Branch: `v2/commercial-domain`.
+Status: REJECTED FOR HUMAN VALIDATION até revalidação do checkpoint corretivo. Base homologada: `f6b7f6d7c03ff5fc6554ee0d307d3300619d9539`. Branch: `v2/commercial-domain`.
 
 Este documento registra o recorte funcional aprovado, a implementação da SPEC 05 e o roteiro de validação. A SPEC 06 permanece bloqueada.
 
@@ -80,10 +80,16 @@ A V2-SPEC 06 depende de Human Validation e aprovação explícita da V2-SPEC 05.
 
 ## Implementação da SPEC 05
 
-Status funcional: READY FOR HUMAN VALIDATION. A preparação acima foi implementada na branch `v2/commercial-domain`. A V2-SPEC 06 permanece bloqueada.
+Status funcional: REJECTED FOR HUMAN VALIDATION até aprovação explícita do checkpoint corretivo. A V2-SPEC 06 permanece bloqueada.
 
 - A Agenda é a rota `/agenda`; a Central aparece no Dashboard e na Agenda. A configuração de limites fica em Configurações > Alertas. Ações no HOT40 e na Agenda usam o mesmo Contact e a mesma atividade.
 - Comandos de ciclo recebem `commandKey`, `expectedVersion` e são persistidos junto com `ActivityCycleEvent` na transação Dexie. O evento mantém data anterior, data resultante, motivo, horário e versão resultante. Repetir uma chave devolve o resultado lógico original mesmo depois de uma transição posterior; uma chave reutilizada para outra ação é rejeitada.
 - O schema Dexie v11 adiciona `activityCycleEvents`, `commercialAttentionPolicies` e índice composto para `Notification.causeKey`. Notificações preexistentes preservam id, conteúdo e status; recebem severidade informativa quando ausente e não ganham referência inventada. Somente novas causas da SPEC 05 entram na reconciliação.
 - A semana proporcional usa o calendário comercial de São Paulo, com início inclusivo e fim exclusivo. A Central mostra atividade vencida antes da indicação sem próxima ação do mesmo Contact; ambas as causas continuam rastreáveis. Ao concluir a vencida, a indicação sem próxima ação passa a aparecer.
-- Na Agenda do ambiente de demonstração, clicar em `Preparar cenário de validação`. O comando idempotente cria uma planejada vencida há dois dias para o primeiro HOT40, uma para hoje às 23h30 e outra para daqui a dois dias para o segundo. Não repete atividades com os marcadores de validação nem toca em metas. Atualizar, marcar a notificação lida, concluir ou reagendar a vencida e conferir resolução. Para HOT40 parado, registrar interação realizada com data anterior ao limite configurado e ajustar o limite em Configurações > Alertas se necessário. Os dados de produção não são sobrescritos.
+- Na Agenda do ambiente de demonstração, clicar em `Preparar cenário de validação`. O comando cria contatos de validação independentes para vencida, hoje, futura, sem próxima ação, parado e cinco contatos para denominador do funil. Marca os registros por cenário e período para repetir o comando sem duplicar. O parado mantém uma ação futura, mas não possui interação realizada desde a entrada anterior ao limite. O funil usa cinco contatos com abordagem marcada e conversão inferior a 50%. Se não houver meta positiva configurada para a semana corrente, o comando configura meta 10 em um indicador ainda sem benchmark; jamais substitui metas existentes. Quando todos os indicadores já têm benchmark zero ou legado, a meta deve ser configurada manualmente. Esses dados são fictícios e ficam na sessão de demonstração.
+
+## Correção do checkpoint 9ee5ae64
+
+- A projeção da Central usa a mesma entrada de produção e benchmark do Dashboard, inclusive os Contacts do tenant e a origem normalizada pelos parâmetros de qualificação. O alerta compara a linha da semana comercial **corrente** com a expectativa proporcional. O Dashboard permite consultar semanas passadas e futuras, cujo gap integral não equivale, por si só, a um alerta vigente. A Central agora identifica mês e semana correntes para deixar esse recorte visível. O destino da causa leva o período correspondente para a visão semanal. Meta zero, ausente e legado não geram causa.
+- O CTA da atividade interpreta `activityId` na query com `useSearchParams`, valida tenant, Contact e status `planned`, e abre o drawer com ações de concluir, reagendar, cancelar e abrir Contact. O parâmetro é removido ao fechar. Recarregar a URL abre a mesma atividade; ID inválido, terminal, excluído ou de outro tenant não abre um registro diferente.
+- Revalidar no Preview: preparar cenário duas vezes e conferir contagens; marcar lida e atualizar dez vezes, conferindo mesmos IDs, `createdAt`, atividades e eventos; concluir uma vencida e conferir seu único evento, `scheduledAt`, `completedAt`, resolução e eventual causa sem próxima ação; reagendar e cancelar as outras; registrar realização no contato parado e conferir resolução; na semana corrente, conferir alvo 10 e produção abaixo da expectativa, elevar a produção até a expectativa, conferir resolução, e testar meta zero; abrir o CTA da vencida e atualizar com `?activity=<id>`; verificar Funil, Performance, Agenda e drawer no desktop e no mobile. A validação automatizada fixa 18/10/2026 às 12h em São Paulo para reproduzir Semana 3, ABPhone 10, realizado 0, gap -10 e alerta ativo.

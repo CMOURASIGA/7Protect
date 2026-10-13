@@ -5,7 +5,8 @@ import Dexie from "dexie";
 import { timestamps } from "@/domains/shared/entity";
 import { selectDatabase, getDatabase } from "@/repositories/local/database";
 import { getRepositoryProvider } from "@/repositories/providers";
-import { commercialWeekInterval, expectedWeeklyProduction, operationalAttention, DEFAULT_ATTENTION_POLICY } from "@/application/commercial-attention";
+import { commercialWeekInterval, expectedWeeklyProduction, operationalAttention, navigablePlannedActivity, DEFAULT_ATTENTION_POLICY } from "@/application/commercial-attention";
+import { prepareOperationalDemo } from "@/application/operational-service";
 import { commercialLocalDateTimeToIso } from "@/application/commercial-aggregations";
 import type { CommercialActivity, Contact, Hot40Membership, Notification } from "@/domains/core/entities";
 
@@ -104,6 +105,68 @@ test("tenant boundary excludes foreign activities and contacts", () => {
   const result = operationalAttention(base("2026-10-09T12:00:00Z", [c], [m], [foreign]));
   assert.equal(result.agenda.overdue.length, 0);
   assert.equal(result.causes.some((cause) => cause.type === "overdue"), false);
+});
+
+test("Human Validation: Week 3 ABPhone target 10, actual 0 produces an idempotent alert and resolves at expectation", async () => {
+  const c = contact(); const now = "2026-10-18T15:00:00Z"; // Noon in São Paulo, Week 3.
+  const benchmark = { ...timestamps(), tenantId, year: 2026, month: 10, activityType: "ab_phone" as const, weeklyTargets: [0, 0, 10, 0, 0] as [number, number, number, number, number] };
+  const input = { ...base(now, [c], [], []), benchmarks: [benchmark] };
+  const projected = operationalAttention(input);
+  const row = projected.report.weekly[2].indicators.find((item) => item.type === "ab_phone")!;
+  const interval = commercialWeekInterval(2026, 10, 18);
+  const expected = expectedWeeklyProduction(row.target, Date.parse(now), interval.start, interval.end);
+  assert.equal(row.target, 10); assert.equal(row.actual, 0); assert.equal(row.gap, -10); assert.ok(expected > 0);
+  const cause = projected.causes.find((item) => item.type === "weekly_gap")!;
+  assert.ok(cause); assert.equal(cause.occurrenceKey, "2026-10:3");
+  const repo = getRepositoryProvider().notifications;
+  const candidate = () => ({ ...timestamps(), ...cause, status: "unread" as const });
+  for (let index = 0; index < 10; index++) await repo.reconcile(tenantId, [candidate()]);
+  const saved = (await repo.list(tenantId))[0];
+  assert.equal((await repo.list(tenantId)).length, 1);
+  await repo.markRead(tenantId, saved.id);
+  const actual = Array.from({ length: expected }, () => ({ ...activity(c.id, now), status: "completed" as const, completedAt: now }));
+  assert.equal(operationalAttention({ ...input, activities: actual }).causes.some((item) => item.type === "weekly_gap"), false);
+  await repo.reconcile(tenantId, []);
+  assert.equal((await repo.findById(saved.id))?.status, "resolved");
+  assert.equal((await repo.findById(saved.id))?.createdAt, saved.createdAt);
+  assert.equal(operationalAttention({ ...input, benchmarks: [{ ...benchmark, weeklyTargets: [0, 0, 0, 0, 0] }] }).causes.some((item) => item.type === "weekly_gap"), false);
+  assert.equal(operationalAttention({ ...input, benchmarks: [{ ...benchmark, weeklyTargets: undefined, legacyWeeklyTarget: 10 }] }).causes.some((item) => item.type === "weekly_gap"), false);
+  assert.equal(operationalAttention({ ...input, benchmarks: [] }).causes.some((item) => item.type === "weekly_gap"), false);
+});
+
+test("navigation resolves only planned activity and Contact from current tenant", () => {
+  const c = contact(); const a = activity(c.id, "2026-10-16T12:00:00Z");
+  assert.equal(navigablePlannedActivity(a.id, tenantId, [a], [c])?.id, a.id);
+  assert.equal(navigablePlannedActivity("missing", tenantId, [a], [c]), null);
+  assert.equal(navigablePlannedActivity(a.id, "other", [a], [c]), null);
+  assert.equal(navigablePlannedActivity(a.id, tenantId, [{ ...a, status: "cancelled" }], [c]), null);
+  assert.equal(navigablePlannedActivity(a.id, tenantId, [a], [{ ...c, tenantId: "other" }]), null);
+});
+
+test("demo preparation creates independent scenarios once and preserves activities, notifications and event IDs", async () => {
+  process.env.NEXT_PUBLIC_DEMO_MODE = "true";
+  try {
+    const db = getDatabase();
+    await db.tenants.add({ ...timestamps(), tenantId: "root", id: tenantId, name: "Demo" });
+    await getRepositoryProvider().commercialParameters.initializeMatrix(tenantId);
+    const now = "2026-10-18T15:00:00Z";
+    const first = await prepareOperationalDemo(now);
+    assert.equal(first.agenda.overdue.length, 1);
+    assert.equal(first.agenda.today.length, 1);
+    assert.ok(first.agenda.upcoming.length >= 2);
+    assert.ok(first.agenda.noNext.some((item) => item.contact.fullName.includes("sem-proxima-acao")));
+    assert.ok(first.causes.some((item) => item.type === "stalled"));
+    assert.ok(first.causes.some((item) => item.type === "weekly_gap"));
+    assert.ok(first.causes.some((item) => item.type === "bottleneck"));
+    const snapshot = { contacts: await db.contacts.count(), activities: await db.commercialActivities.toArray(), notifications: await db.notifications.toArray(), events: await db.activityCycleEvents.count(), benchmarks: await db.commercialBenchmarks.toArray() };
+    const second = await prepareOperationalDemo(now);
+    assert.equal(await db.contacts.count(), snapshot.contacts);
+    assert.deepEqual(await db.commercialActivities.toArray(), snapshot.activities);
+    assert.deepEqual(await db.notifications.toArray(), snapshot.notifications);
+    assert.equal(await db.activityCycleEvents.count(), snapshot.events);
+    assert.deepEqual(await db.commercialBenchmarks.toArray(), snapshot.benchmarks);
+    assert.deepEqual(second.causes.map((item) => item.causeKey), first.causes.map((item) => item.causeKey));
+  } finally { delete process.env.NEXT_PUBLIC_DEMO_MODE; }
 });
 
 test("notification reconciliation is stable across refreshes, reading and resolution", async () => {

@@ -6,6 +6,11 @@ export type AttentionPolicy = Pick<CommercialAttentionPolicy, "stalledDays" | "c
 export const DEFAULT_ATTENTION_POLICY: AttentionPolicy = { stalledDays: 7, criticalStalledDays: 14, criticalOverdueHours: 48, funnelMinimumContacts: 5, funnelMaximumConversion: 50 };
 export type AttentionCause = Pick<Notification, "tenantId" | "contactId" | "title" | "message" | "type" | "severity" | "sourceType" | "sourceId" | "occurrenceKey" | "causeKey"> & { dueAt?: string; priority: number; action: string; href: string };
 export type AgendaEntry = { activity: CommercialActivity; contact: Contact; stage?: string; overdueMs: number };
+export function navigablePlannedActivity(id: string | null, tenantId: string, activities: CommercialActivity[], contacts: Contact[]) {
+  if (!id) return null;
+  const activity = activities.find((item) => item.id === id && item.tenantId === tenantId && item.status === "planned" && !item.deletedAt);
+  return activity && contacts.some((contact) => contact.id === activity.contactId && contact.tenantId === tenantId && !contact.deletedAt) ? activity : null;
+}
 
 // Convert a São Paulo local midnight to a UTC instant using the timezone's actual offset.
 function zonedStart(year: number, month: number, day: number) {
@@ -52,11 +57,13 @@ export function operationalAttention(input: { tenantId: string; now: string; con
     if (days >= policy.stalledDays) add({ contactId: contact.id, type: "stalled", severity: days >= policy.criticalStalledDays ? "critical" : "attention", title: contact.fullName, message: `Sem interação realizada há ${Math.floor(days)} dias.`, sourceType: "membership", sourceId: member.id, occurrenceKey: "active", dueAt: last, priority: 3, action: "Abrir contato", href: `/hot40?contact=${contact.id}` });
   }
   for (const member of noNext) { const contact = contacts.get(member.contactId)!; add({ contactId: contact.id, type: "no_next_action", severity: "attention", title: contact.fullName, message: "HOT40 sem próxima ação planejada.", sourceType: "membership", sourceId: member.id, occurrenceKey: "active", priority: 4, action: "Planejar atividade", href: `/hot40?contact=${contact.id}&action=new` }); }
-  const report = commercialDashboard(activities, [...contacts.values()], benchmarks.filter((item) => item.tenantId === tenantId), { year: today.year, month: today.month });
+  // Use the same unfiltered tenant production and benchmarks as the Dashboard.
+  // Agenda eligibility (active Contacts) must not narrow the reporting denominator.
+  const report = commercialDashboard(input.activities.filter((item) => item.tenantId === tenantId), input.contacts.filter((item) => item.tenantId === tenantId), benchmarks.filter((item) => item.tenantId === tenantId), { year: today.year, month: today.month });
   const interval = commercialWeekInterval(today.year, today.month, today.day);
   for (const row of report.weekly[interval.week - 1].indicators) {
     const expected = expectedWeeklyProduction(row.target, time, interval.start, interval.end);
-    if (row.target && expected > 0 && row.actual < expected) add({ type: "weekly_gap", severity: "attention", title: INDICATOR_LABEL[row.type], message: `${row.actual} realizadas, ${expected} esperadas até agora na Semana ${interval.week}.`, sourceType: "benchmark", sourceId: row.type, occurrenceKey: `${today.period}:${interval.week}`, priority: 5, action: "Ver visão semanal", href: "/?view=week" });
+    if (row.target !== null && row.target > 0 && expected > 0 && row.actual < expected) add({ type: "weekly_gap", severity: "attention", title: INDICATOR_LABEL[row.type], message: `${row.actual} realizadas, ${expected} esperadas até agora na Semana ${interval.week}.`, sourceType: "benchmark", sourceId: row.type, occurrenceKey: `${today.period}:${interval.week}`, priority: 5, action: "Ver visão semanal", href: `/?view=week&year=${today.year}&month=${today.month}` });
   }
   const bottleneck = report.bottleneck;
   if (bottleneck) {
@@ -65,5 +72,5 @@ export function operationalAttention(input: { tenantId: string; now: string; con
   }
   causes.sort((a, b) => a.priority - b.priority || ({ critical: 0, attention: 1, info: 2 }[a.severity!] - { critical: 0, attention: 1, info: 2 }[b.severity!]) || (a.dueAt || "").localeCompare(b.dueAt || "") || a.causeKey!.localeCompare(b.causeKey!));
   const overdueContacts = new Set(overdue.map((entry) => entry.contact.id));
-  return { agenda: { overdue, today: todayEntries, upcoming, noNext: noNext.map((member) => ({ member, contact: contacts.get(member.contactId)! })) }, causes: causes.filter((item) => item.type !== "info"), attention: causes.filter((item) => item.type !== "no_next_action" || !item.contactId || !overdueContacts.has(item.contactId)), report };
+  return { currentPeriod: { year: today.year, month: today.month, week: interval.week }, agenda: { overdue, today: todayEntries, upcoming, noNext: noNext.map((member) => ({ member, contact: contacts.get(member.contactId)! })) }, causes: causes.filter((item) => item.type !== "info"), attention: causes.filter((item) => item.type !== "no_next_action" || !item.contactId || !overdueContacts.has(item.contactId)), report };
 }
