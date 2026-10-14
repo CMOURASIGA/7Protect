@@ -10,6 +10,7 @@ import { timestamps } from "@/domains/shared/entity";
 import { DEFAULT_ATTENTION_POLICY, operationalAttention, type AttentionPolicy } from "@/application/commercial-attention";
 import { commercialReportingContacts, INDICATOR_TYPES } from "@/application/commercial-dashboard";
 import type { ActivityCycleEvent, Notification } from "@/domains/core/entities";
+import { DEMO_SCENARIO_KEY, markCommercialDemoCreated } from "./commercial-demo-provenance";
 
 async function tenantId() { const { tenant } = await getFoundation(); if (!tenant) throw new Error("Configure a corretora."); return tenant.id; }
 export async function operationalOverview(now = new Date().toISOString()) {
@@ -34,24 +35,30 @@ export async function saveAttentionPolicy(input: AttentionPolicy) {
 }
 export async function prepareOperationalDemo(now = new Date().toISOString()) {
   if (!isDemoMode()) throw new Error("Cenário disponível apenas na demonstração.");
+  const createdContacts = new Set<string>();
   const data = await commercialOverview();
   const options = (group: string) => { const value = data.parameters.find((item) => item.group === group && item.active); if (!value) throw new Error(`Parâmetro ${group} não disponível.`); return value.id; };
   const demoContact = async (key: string, hot40: boolean) => {
     const email = `spec05-${key}@example.test`;
     let contact = data.contacts.find((item) => item.email === email && !item.deletedAt);
-    if (!contact) contact = await createCommercialContact({ fullName: `Validação SPEC 05 - ${key}`, email, origin: "Demonstração", consultant: undefined, phone: undefined, notes: "Cenário independente da SPEC 05" });
+    if (contact && (contact as typeof contact & { demoScenarioKey?: string }).demoScenarioKey !== DEMO_SCENARIO_KEY) return contact; // Legacy or manually created record is never adopted for reset.
+    const created = !contact;
+    if (!contact) { contact = await createCommercialContact({ fullName: `Validação SPEC 05 - ${key}`, email, origin: "Demonstração", consultant: undefined, phone: undefined, notes: "Cenário independente da SPEC 05" }); createdContacts.add(contact.id); await markCommercialDemoCreated("contacts", contact.id, await tenantId()); }
     if (hot40) {
       const qualification = data.qualifications.find((item) => item.contactId === contact!.id && !item.deletedAt);
-      if (qualification?.status !== "qualified") await saveProspectQualification(contact.id, { status: "qualified", sourceId: options("source"), incomeBandId: options("income_band"), ageRangeId: options("age_range"), maritalStatusId: options("marital_status"), childrenId: options("children"), contactFrequencyId: options("contact_frequency"), approachEaseId: options("approach_ease"), referralPotentialId: options("referral_potential"), profession: "Validação", originDate: commercialDateParts(now)!.period + "-01" });
-      await addToHot40(contact.id);
+      if (qualification?.status !== "qualified") { const saved = await saveProspectQualification(contact.id, { status: "qualified", sourceId: options("source"), incomeBandId: options("income_band"), ageRangeId: options("age_range"), maritalStatusId: options("marital_status"), childrenId: options("children"), contactFrequencyId: options("contact_frequency"), approachEaseId: options("approach_ease"), referralPotentialId: options("referral_potential"), profession: "Validação", originDate: commercialDateParts(now)!.period + "-01" }); if (!qualification) await markCommercialDemoCreated("prospectQualifications", saved.id, await tenantId()); }
+      const priorMember = data.memberships.find((item) => item.contactId === contact!.id && !item.deletedAt && item.status !== "removed");
+      const member = await addToHot40(contact.id);
+      if (!priorMember) { await markCommercialDemoCreated("hot40Memberships", member.id, await tenantId()); const event = (await getRepositoryProvider().hot40StageEvents.list(await tenantId())).find((item) => item.membershipId === member.id); if (event) await markCommercialDemoCreated("hot40StageEvents", event.id, await tenantId()); }
     }
+    if (created) await markCommercialDemoCreated("contacts", contact.id, await tenantId());
     return contact;
   };
   const parts = commercialDateParts(now)!;
   const day = (offset: number) => new Date(Date.UTC(parts.year, parts.month - 1, parts.day + offset)).toISOString().slice(0, 10);
   const ensureActivity = async (contactId: string, key: string, type: "ab_phone" | "approach_scheduled", status: "planned" | "completed", date: string) => {
     const notes = `Validação SPEC 05: ${key}`;
-    if (!(await getRepositoryProvider().commercialActivities.list(await tenantId())).some((item) => item.contactId === contactId && item.notes === notes)) await createCommercialActivity({ contactId, type, status, [status === "planned" ? "scheduledAt" : "completedAt"]: date, notes });
+    if (!(await getRepositoryProvider().commercialActivities.list(await tenantId())).some((item) => item.contactId === contactId && item.notes === notes)) { const activity = await createCommercialActivity({ contactId, type, status, [status === "planned" ? "scheduledAt" : "completedAt"]: date, notes }); await markCommercialDemoCreated("commercialActivities", activity.id, await tenantId()); }
   };
   const overdue = await demoContact("vencida", true);
   const today = await demoContact("hoje", true);
@@ -65,7 +72,7 @@ export async function prepareOperationalDemo(now = new Date().toISOString()) {
   const repository = getRepositoryProvider();
   const membership = (await repository.hot40Memberships.list(await tenantId())).find((item) => item.contactId === stalled.id && item.status === "active");
   const policy = (await repository.commercialAttentionPolicies.list(await tenantId()))[0] || DEFAULT_ATTENTION_POLICY;
-  if (membership && Date.parse(membership.enteredAt) > Date.parse(now) - policy.stalledDays * 86400000) await repository.hot40Memberships.update({ ...membership, enteredAt: new Date(Date.parse(now) - Math.max(20, policy.criticalStalledDays + 1) * 86400000).toISOString() });
+  if (membership && Date.parse(membership.enteredAt) > Date.parse(now) - policy.stalledDays * 86400000) { const updated = await repository.hot40Memberships.update({ ...membership, enteredAt: new Date(Date.parse(now) - Math.max(20, policy.criticalStalledDays + 1) * 86400000).toISOString() }); if (createdContacts.has(stalled.id)) { await markCommercialDemoCreated("hot40Memberships", updated.id, await tenantId()); await markCommercialDemoCreated("contacts", stalled.id, await tenantId()); } }
   // Five distinct Contacts establish a funnel denominator without creating ABPhone production.
   for (let index = 1; index <= 5; index++) {
     const contact = await demoContact(`funil-${index}`, false);
@@ -76,6 +83,6 @@ export async function prepareOperationalDemo(now = new Date().toISOString()) {
   const currentWeek = Math.min(5, Math.ceil(parts.day / 7));
   const configured = fresh.benchmarks.filter((item) => item.year === parts.year && item.month === parts.month && !item.deletedAt);
   const type = configured.some((item) => (item.weeklyTargets?.[currentWeek - 1] || 0) > 0) ? undefined : INDICATOR_TYPES.find((indicator) => !configured.some((item) => item.activityType === indicator));
-  if (type) await saveCommercialBenchmark({ year: parts.year, month: parts.month, activityType: type, weeklyTargets: ([1, 2, 3, 4, 5] as const).map((week) => week === currentWeek ? 10 : 0) as [number, number, number, number, number] });
+  if (type) { const benchmark = await saveCommercialBenchmark({ year: parts.year, month: parts.month, activityType: type, weeklyTargets: ([1, 2, 3, 4, 5] as const).map((week) => week === currentWeek ? 10 : 0) as [number, number, number, number, number] }); await markCommercialDemoCreated("commercialBenchmarks", benchmark.id, await tenantId()); }
   return operationalOverview(now);
 }

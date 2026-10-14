@@ -16,6 +16,12 @@ Schema IndexedDB 12 adiciona `importBatches` e `importOperations`, sem modificar
 
 Rollback confere versão e vínculos posteriores, incluindo atividades, oportunidades, referências, movimentações e operações de outro lote. Conflito preserva dados e aparece no resultado. Quando seguro, reverte o registro criado ou restaura os valores anteriores. O reset da Demo é isolado pelo banco de sessão `demoDatabaseName` e não atua sobre banco operacional. A preparação de cenário já existente da Agenda cria contatos fictícios e atividades identificáveis de forma idempotente, com meta e funil; a página Importação oferece acesso a preparar/resetar a sessão demo e percorrer Mercado Base, Agenda/Central e Dashboard/Metis.
 
+### Correção do checkpoint: reset comercial
+
+O reset comercial usa `resetCommercialDemoScenario()` e uma transação própria do repository. O reset global `resetDemo()` continua reservado à reinicialização completa do banco da demonstração legada; os botões da V2 chamam somente o reset do cenário comercial. Cada registro criado pela preparação nova recebe `demoScenarioKey` e a versão no momento da criação. O reset verifica versão, tenant e vínculos antes de excluir Contacts e suas dependências identificadas. Edição manual, associação a lote e vínculos não pertencentes ao cenário preservam o Contact e todas as suas dependências. Benchmarks e metas só são removidos se marcados pelo preparo e ainda na versão marcada. `importBatches` e `importOperations` nunca entram na transação de exclusão. Após o reset, a preparação idempotente recria o cenário.
+
+Registros demonstrativos criados antes desta marcação não são assumidos por nome, e-mail ou data. São preservados por segurança; em uma sessão nova, a preparação gera registros com proveniência explícita. Uma interrupção entre criação e marcação também preserva o registro não marcado. O resultado do reset informa os IDs preservados por conflito.
+
 ## Roteiro para Human Validation
 
 1. Na sessão Demo, abrir Importação e selecionar `OFICIAL - Contatos e HOT40_vFinal.xlsm`. Antes de confirmar, ver 17 linhas, 10 intenções HOT40, 9 datas, aviso de `#VALUE!` e nenhum novo Contact.
@@ -27,6 +33,7 @@ Rollback confere versão e vínculos posteriores, incluindo atividades, oportuni
 7. Preparar demo duas vezes: mesma quantidade de contatos e atividades. Percorrer Mercado Base, qualificação, HOT40, Agenda, Central, Dashboard, Funil e Metis. Resetar somente a sessão Demo.
 8. Regressão SPECs 01–06: lista/Kanban e arraste, timeline, ciclo de atividade, alertas idempotentes, benchmark Semana 1–5, Funil/Performance e respostas da Metis. Conferir navegação/refresh.
 9. Rodada desktop e mobile: Dashboard, Mercado Base, HOT40 Lista/Kanban, drawers, Agenda, Central, Metis, Configurações e fluxo completo da Importação. Registrar dispositivo, viewport, navegador, resultado `PASS`, `FAIL` ou `NOT TESTED` com evidência. Mobile não deve ser presumido aprovado a partir de teste unitário ou CSS.
+10. Reteste focal: após importação e rollback com conflito, clicar em `Resetar cenário demonstrativo`. Confirmar que Contact preservado, ImportBatch, ImportOperation, benchmark importado e conflito permanecem após refresh. Conferir remoção/recriação apenas dos IDs marcados para demo. Repetir reset e preparo, sem duplicação. Conferir navegação e regressão das SPECs 01 a 06.
 
 ## Gates
 
