@@ -1,8 +1,8 @@
 # V2-SPEC 05 - Agenda Operacional, Alertas e Notificações
 
-Status: REJECTED FOR HUMAN VALIDATION até revalidação do checkpoint corretivo. Base homologada: `f6b7f6d7c03ff5fc6554ee0d307d3300619d9539`. Branch: `v2/commercial-domain`.
+Status: APPROVED. SHA homologado: `6f3ad36c72e6de7c9aa6cea9a37bf6323aa6802f`. Base inicial: `f6b7f6d7c03ff5fc6554ee0d307d3300619d9539`. Branch: `v2/commercial-domain`.
 
-Este documento registra o recorte funcional aprovado, a implementação da SPEC 05 e o roteiro de validação. A SPEC 06 permanece bloqueada.
+Este documento registra o recorte funcional, a implementação da SPEC 05 e o roteiro de validação. A preparação documental da V2-SPEC 06 foi autorizada após a homologação.
 
 ## 1. Contratos existentes e lacunas
 
@@ -76,11 +76,11 @@ Roteiro humano: criar planejada para hoje, futura e vencida; conferir as quatro 
 
 ## 8. Gate
 
-A V2-SPEC 06 depende de Human Validation e aprovação explícita da V2-SPEC 05.
+A V2-SPEC 06 dependia de Human Validation e aprovação explícita da V2-SPEC 05. A condição foi cumprida no SHA `6f3ad36c72e6de7c9aa6cea9a37bf6323aa6802f`; somente a preparação foi autorizada.
 
 ## Implementação da SPEC 05
 
-Status funcional: REJECTED FOR HUMAN VALIDATION até aprovação explícita do checkpoint corretivo. A V2-SPEC 06 permanece bloqueada.
+Status funcional final: APPROVED no checkpoint `6f3ad36c72e6de7c9aa6cea9a37bf6323aa6802f`. As notas de reprovação abaixo registram checkpoints anteriores e não representam o estado atual.
 
 - A Agenda é a rota `/agenda`; a Central aparece no Dashboard e na Agenda. A configuração de limites fica em Configurações > Alertas. Ações no HOT40 e na Agenda usam o mesmo Contact e a mesma atividade.
 - Comandos de ciclo recebem `commandKey`, `expectedVersion` e são persistidos junto com `ActivityCycleEvent` na transação Dexie. O evento mantém data anterior, data resultante, motivo, horário e versão resultante. Repetir uma chave devolve o resultado lógico original mesmo depois de uma transição posterior; uma chave reutilizada para outra ação é rejeitada.
@@ -99,4 +99,10 @@ Status funcional: REJECTED FOR HUMAN VALIDATION até aprovação explícita do c
 - `commercialDashboard()` produz o único `bottleneck` com `type`, `previousType`, `denominator`, `converted`, `conversion` e `period`. A Central consome esses campos sem buscar o estágio anterior nem recalcular o denominador. O Funil exibe a mesma base e quantidade convertida ao lado do percentual.
 - No Dashboard, a Central e o Funil do mês corrente sem filtro usam o mesmo snapshot de `operationalOverview()` e o mesmo objeto `report`. Com filtro de consultor/origem ou seleção de outro mês, o relatório selecionado tem escopo próprio; a Central continua mostrando as prioridades gerais da semana corrente, como indica seu cabeçalho.
 - O teste de reconciliação cobre a troca `approach_scheduled` para `approach_completed`: a chave antiga passa a `resolved`, apenas a nova permanece ativa, e novos refreshes preservam IDs e estados. Nenhum schema novo foi necessário.
-- Reteste focal: preparar o cenário, abrir Funil e comparar etapa, conversão e denominador com a Central. Alterar o funil para deslocar o gargalo, atualizar e conferir a resolução da notificação anterior. Recarregar e repetir a comparação. Configurar meta zero na semana corrente e conferir a ausência de alerta de baixo desempenho. Revalidar mobile; se o ambiente não oferecer viewport confiável, registrar `NOT TESTED`. A SPEC 05 continua rejeitada até aprovação humana explícita.
+- Roteiro do reteste focal anterior: preparar o cenário, abrir Funil e comparar etapa, conversão e denominador com a Central. Alterar o funil para deslocar o gargalo, atualizar e conferir a resolução da notificação anterior. Recarregar e repetir a comparação. Configurar meta zero na semana corrente e conferir a ausência de alerta de baixo desempenho. Revalidar mobile; se o ambiente não oferecer viewport confiável, registrar `NOT TESTED`. O resultado final e as coberturas não executadas constam na homologação abaixo.
+
+## Homologação final
+
+- V2-SPEC 05 APPROVED no SHA `6f3ad36c72e6de7c9aa6cea9a37bf6323aa6802f`. A Central e o Funil mostraram `Abordagens Realizadas`, `0 de 5 contatos` e `0%` no mesmo cenário. Após quatro recargas, mantiveram o gargalo sem duplicações. A meta semanal zero removeu o alerta e permaneceu assim após três recargas.
+- Mudança forçada de gargalo e viewport mobile foram registradas como cobertura não executada, sem bloquear a homologação. A mudança A → B tem teste automatizado de reconciliação; ainda requer cobertura humana em ciclo oportuno.
+- V2-SPEC 06 liberada somente para preparação. Ver `V2_SPEC_06_METIS_COMMERCIAL_PREPARATION.md`.
