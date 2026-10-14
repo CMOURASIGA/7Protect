@@ -95,6 +95,16 @@ O 7Protect deve reutilizar a linguagem visual, shell responsivo, tokens, comport
 8. `docs/specs/SPEC_08_OPERATIONAL_GUIDE_CONTEXTUAL_HELP.md`
 9. `docs/specs/SPEC_09_DATA_PORTABILITY_CLOUD_MIGRATION.md`
 
+### Linha V2 experimental
+
+A fundação do novo domínio comercial está isolada na branch `v2/commercial-domain`, sem alterar o fluxo homologado em `develop` e `main`. A ativação é explícita por ambiente:
+
+```env
+NEXT_PUBLIC_DOMAIN_MODE=commercial-v2
+```
+
+Sem essa variável, o produto mantém o modo `legacy`. A especificação está em `docs/specs/V2_SPEC_01_COMMERCIAL_DOMAIN_FOUNDATION.md`.
+
 ### Status do roadmap
 
 - **SPEC 07 — Metis Production Readiness:** aprovada como `SPEC 07 - METIS PRODUCTION READY` na Human Validation. SHA homologado: `f8c731d27d0d8243a914b978fd91c4fffe19dd6d`.
@@ -111,3 +121,37 @@ Documentos complementares:
 ## Sequência recomendada de desenvolvimento
 
 Implementar as SPECs em ordem. Cada SPEC deve gerar um checkpoint validável pelo usuário em `develop`, publicado no Vercel, antes do início da próxima etapa e antes de qualquer promoção para `main`.
+
+## V2-SPEC 02 - Mercado Base e Qualificação
+
+O Mercado Base V2 oferece cadastro rápido, edição do mesmo Contact, qualificação estruturada, busca e filtros combináveis. Configurações passa a separar Parâmetros comerciais e Marca da corretora. Os valores da aba Matriz são dados iniciais editáveis por tenant, persistidos em repositories próprios. HOT40 continua exigindo qualificação válida, sem score automático.
+
+Status: implementada, aguardando Human Validation. Base aprovada da V2-SPEC 01: `6eaa2987ec8c23e7199e76172aad5b223ed180b2`. Branch: `v2/commercial-domain`. Confira o roteiro em `docs/specs/V2_SPEC_02_MARKET_BASE_QUALIFICATION_PARAMETERS.md`. V2-SPEC 03 não iniciada.
+
+Verificação: `npm test`, `npm run typecheck`, `npm run lint`, `NEXT_PUBLIC_DOMAIN_MODE=commercial-v2 npm run build` e `git diff --check`.
+
+## V2-SPEC 03 - HOT40 operacional
+
+Lista e Kanban usam os mesmos Contacts e memberships. Etapas e atividades geram timeline por contato; próxima ação, última interação e tempo parado são derivados dos eventos. Implementada em `v2/commercial-domain`, pendente de Human Validation. Roteiro: `docs/specs/V2_SPEC_03_HOT40_KANBAN_ACTIVITIES.md`.
+
+## V2-SPEC 04 - Indicadores comerciais
+
+O Dashboard V2 organiza Visão do Mês, Visão Semanal, Funil e Performance. Benchmarks por período são configuráveis; resultados e conversões são derivados de atividades comerciais. O roteiro de validação está em `docs/specs/V2_SPEC_04_DASHBOARD_INDICATORS_BENCHMARK_FUNNEL.md`. Pendente de Human Validation.
+
+### Domínio Comercial V2, SPEC 05
+
+A Agenda operacional em `/agenda` reúne Hoje, Atrasadas, Próximas e HOT40 sem próxima ação. O Dashboard exibe a Central de atenção. Atividades planejadas são concluídas, canceladas ou reagendadas no mesmo registro, com evento de ciclo e comando idempotente. Alertas são calculados de atividades, HOT40, benchmark semanal e funil, com notificações internas rastreáveis. Limites ficam em Configurações > Alertas. Consulte `docs/specs/V2_SPEC_05_OPERATIONAL_AGENDA_ALERTS_NOTIFICATIONS_PREPARATION.md` para regras e Human Validation.
+
+Checkpoint corretivo da SPEC 05: a Central compara a produção do Dashboard com a expectativa proporcional da semana comercial corrente em São Paulo. O CTA de atividade abre o drawer pelo `activityId`, inclusive após refresh. `Preparar cenário de validação` cria contatos fictícios separados e identificáveis para cada alerta, sem substituir benchmarks existentes.
+
+Correção final do gargalo: o Dashboard/Funil fornece etapa, origem, denominador, convertidos, conversão e período em um único resultado. No mês corrente sem filtros, a Central do Dashboard compartilha o mesmo snapshot e o reconciliador resolve notificações da etapa anterior quando o maior gargalo muda.
+
+A V2-SPEC 05 foi aprovada no SHA `6f3ad36c72e6de7c9aa6cea9a37bf6323aa6802f`. Mudança forçada de gargalo e mobile permanecem como cobertura humana não executada. A preparação da V2-SPEC 06, Metis Comercial, está em `docs/specs/V2_SPEC_06_METIS_COMMERCIAL_PREPARATION.md`.
+
+### Checkpoint de implementação V2-SPEC 06
+
+A Metis Comercial responde a oito perguntas operacionais no Dashboard, na Agenda e no detalhe do HOT40, com explicação, referência ao fato, período em São Paulo e link para ação humana. A leitura é feita diretamente pelos repositories, sem reconciliação ou escrita; usa a projeção da Central e o único objeto de gargalo do Funil. As perguntas podem ser escolhidas ou digitadas em linguagem equivalente dentro do recorte suportado. A resposta é recalculada sob demanda e não fica armazenada. O primeiro recorte é determinístico e não ativa provider de IA pago. A Metis de planejamento do cliente permanece separada. A Human Validation da V2-SPEC 06 deve comparar as respostas com as telas canônicas e validar desktop e mobile antes de homologação.
+
+### V2-SPEC 07 — Importação, Demo e Estabilização
+
+Importação controlada de `.xlsm` em `/importacao`, com análise local, preview, revisão por linha, confirmação transacional, auditoria, relatório e rollback assistido. A importação usa `Contact` canônico e parâmetros do tenant; só `Mercado Base!M = Sim` pode solicitar entrada em HOT40 após qualificação válida. Datas sem identidade da aba HOT40 nunca criam atividades. Benchmarks de `Indicadores!D:H` são opt-in por ano/mês. A Demo permanece em banco de sessão isolado. Regras e roteiro em `docs/specs/V2_SPEC_07_SPREADSHEET_IMPORT_DEMO_STABILIZATION_PREPARATION.md` e `docs/specs/V2_SPEC_07_IMPLEMENTATION_VALIDATION.md`.
