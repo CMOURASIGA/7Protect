@@ -2,6 +2,7 @@
 
 import type { AiAnalysis, BrandSettings, BrokerAnalysis, Client, ClosingRecord, Coverage, CoverageType, Diagnostic, Insurer, InsuranceProduct, PipelineHistory, PlanningCycle, PlanningEvent, ProposalVersion, ReportSnapshot, Task, Tenant } from "@/domains/core/entities";
 import { replaceDatabaseContents, selectDatabase } from "@/repositories/local/database";
+import { isCommercialV2Mode } from "@/lib/domain-mode";
 import { demoDatabaseName, isDemoMode } from "@/lib/demo-mode";
 
 const tenantId = "00000000-0000-4000-8000-000000000001";
@@ -54,7 +55,7 @@ const reports: ReportSnapshot[] = [
   snapshotBase("00000000-0000-4000-8000-000000000112", "commercial_proposal", { brand: { origin: "templateStatic", value: settings }, client: { origin: "clientProvided", value: { id: clientId, name: "Rafael", status: "active" } }, planning: { origin: "clientProvided", value: historicalPlanning }, diagnosis: { origin: "clientProvided", value: declaredData }, analysis: { origin: "brokerAnalysis", value: analysis }, proposal: { origin: "brokerAnalysis", value: historicalProposal }, coverages: { origin: "brokerAnalysis", value: coverages.filter((item) => item.proposalVersionId === historicalProposalId) }, generated: { origin: "templateStatic", value: { generatedAt: "2026-09-18T12:17:00.000Z", templateVersion: "spec-04-v1" } } }, historicalProposalId),
 ];
 
-const seed = () => ({ tenants: [tenant], settings: [settings], leads: [], clients: [rafael], householdMembers: [], diagnostics, planningCycles: [historicalPlanning, metisPlanning], planningEvents: events, brokerAnalyses: [analysis], insurers: [insurer], insuranceProducts: [product], coverageTypes, tasks: [] as Task[], pipelineHistory: [history], proposalVersions: [historicalProposal, metisProposal], coverages, closings: [closing], aiAnalyses: [] as AiAnalysis[], reportSnapshots: reports });
+const seed = (): Record<string, unknown[]> => isCommercialV2Mode() ? { tenants: [tenant], settings: [settings] } : ({ tenants: [tenant], settings: [settings], leads: [], clients: [rafael], householdMembers: [], diagnostics, planningCycles: [historicalPlanning, metisPlanning], planningEvents: events, brokerAnalyses: [analysis], insurers: [insurer], insuranceProducts: [product], coverageTypes, tasks: [] as Task[], pipelineHistory: [history], proposalVersions: [historicalProposal, metisProposal], coverages, closings: [closing], aiAnalyses: [] as AiAnalysis[], reportSnapshots: reports });
 
 export async function initializeDemo() {
   if (!isDemoMode()) return false;

@@ -65,3 +65,28 @@ export type ReportSnapshot = EntityMetadata & {
   templateVersion: string;
   payload: Record<string, unknown>;
 };
+
+export const COMMERCIAL_ACTIVITY_TYPES = ["ab_phone", "approach_scheduled", "approach_completed", "closing_scheduled", "closing_completed", "proposal", "recommendation"] as const;
+export type CommercialActivityType = (typeof COMMERCIAL_ACTIVITY_TYPES)[number];
+export type CommercialActivityStatus = "planned" | "completed" | "cancelled";
+export type CommercialContactStage = "market_base" | "hot40" | "opportunity" | "client";
+export type Contact = EntityMetadata & { fullName: string; email?: string; phone?: string; origin?: string; consultant?: string; status: "active" | "inactive"; commercialStage: CommercialContactStage; notes?: string };
+export type ProspectQualification = EntityMetadata & { contactId: string; status: "pending" | "qualified" | "not_qualified"; source?: string; notes?: string; qualifiedAt?: string; sourceId?: string; incomeBandId?: string; ageRangeId?: string; maritalStatusId?: string; childrenId?: string; contactFrequencyId?: string; approachEaseId?: string; referralPotentialId?: string; estimatedMonthlyIncome?: number; profession?: string; originDate?: string };
+export type Hot40Membership = EntityMetadata & { contactId: string; status: "active" | "paused" | "converted" | "removed"; enteredAt: string; stage?: Hot40Stage; stageChangedAt?: string; priority?: "low" | "normal" | "high"; notes?: string };
+export const HOT40_STAGES = ["ab_phone", "approach_scheduled", "approach_completed", "closing_scheduled", "closing_completed", "proposal"] as const;
+export type Hot40Stage = (typeof HOT40_STAGES)[number];
+export type Hot40StageEvent = EntityMetadata & { contactId: string; membershipId: string; fromStage?: Hot40Stage; toStage: Hot40Stage; occurredAt: string; notes?: string };
+export type CommercialActivity = EntityMetadata & { contactId: string; type: CommercialActivityType; status: CommercialActivityStatus; scheduledAt?: string; completedAt?: string; notes?: string; createdBy?: string };
+export type ActivityCycleEvent = EntityMetadata & { activityId: string; contactId: string; commandKey: string; action: "complete" | "cancel" | "reschedule"; occurredAt: string; previousScheduledAt: string; scheduledAt: string; completedAt?: string; resultVersion: number; reason?: string };
+export type CommercialOpportunity = EntityMetadata & { contactId: string; title: string; status: "open" | "won" | "lost"; source?: string; expectedAt?: string; notes?: string };
+export type CommercialGoal = EntityMetadata & { name: string; target: number; periodStart: string; periodEnd: string; status: "active" | "closed"; notes?: string };
+export type CommercialBenchmark = EntityMetadata & { year: number; month: number; activityType: CommercialActivityType; weeklyTargets?: [number, number, number, number, number]; legacyWeeklyTarget?: number; legacyMonthlyTarget?: number };
+export type Referral = EntityMetadata & { contactId: string; referredContactId?: string; status: "new" | "contacted" | "converted" | "discarded"; notes?: string };
+export type Notification = EntityMetadata & { contactId?: string; title: string; message: string; type: "overdue" | "no_next_action" | "stalled" | "weekly_gap" | "bottleneck" | "info" | "warning" | "success"; severity?: "info" | "attention" | "critical"; status: "unread" | "read" | "resolved"; readAt?: string; resolvedAt?: string; sourceType?: string; sourceId?: string; occurrenceKey?: string; causeKey?: string };
+export type CommercialAttentionPolicy = EntityMetadata & { stalledDays: number; criticalStalledDays: number; criticalOverdueHours: number; funnelMinimumContacts: number; funnelMaximumConversion: number };
+
+export const COMMERCIAL_PARAMETER_GROUPS = ["source", "income_band", "age_range", "marital_status", "children", "contact_frequency", "approach_ease", "referral_potential"] as const;
+export type CommercialParameterGroup = (typeof COMMERCIAL_PARAMETER_GROUPS)[number];
+export type CommercialParameter = EntityMetadata & { group: CommercialParameterGroup; label: string; order: number; active: boolean };
+export type ImportBatch = EntityMetadata & { fileName: string; fileSize: number; fingerprint: string; ruleVersion: string; actor: string; status: "committing" | "completed" | "partial" | "rolled_back_partially"; totals: { analyzed: number; created: number; matched: number; qualified: number; hot40: number; skipped: number; errors: number; review: number }; completedAt?: string };
+export type ImportOperation = EntityMetadata & { batchId: string; operationKey: string; rowFingerprint: string; sheet: string; row: number; kind: "contact" | "benchmark"; status: "created" | "matched" | "updated" | "skipped" | "error" | "review" | "rolled_back"; contactId?: string; qualificationId?: string; membershipId?: string; benchmarkId?: string; before?: { contact?: Contact; qualification?: ProspectQualification; benchmark?: CommercialBenchmark }; afterVersions?: { contact?: number; qualification?: number; membership?: number; benchmark?: number }; message?: string };

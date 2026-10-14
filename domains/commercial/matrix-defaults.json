@@ -1,0 +1,182 @@
+{
+  "source": "OFICIAL - Contatos e HOT40_vFinal.xlsm",
+  "sheet": "Matriz",
+  "range": "C4:J9",
+  "options": [
+    {
+      "group": "income_band",
+      "label": "R$ 7 Mil a R$ 10 Mil",
+      "order": 0
+    },
+    {
+      "group": "age_range",
+      "label": "menos de 30",
+      "order": 0
+    },
+    {
+      "group": "marital_status",
+      "label": "Casado",
+      "order": 0
+    },
+    {
+      "group": "children",
+      "label": "0",
+      "order": 0
+    },
+    {
+      "group": "contact_frequency",
+      "label": "Nenhuma",
+      "order": 0
+    },
+    {
+      "group": "approach_ease",
+      "label": "Sim",
+      "order": 0
+    },
+    {
+      "group": "referral_potential",
+      "label": "Sim",
+      "order": 0
+    },
+    {
+      "group": "source",
+      "label": "Família / amigos",
+      "order": 0
+    },
+    {
+      "group": "income_band",
+      "label": "R$ 11 Mil a R$ 14 Mil",
+      "order": 1
+    },
+    {
+      "group": "age_range",
+      "label": "30 a 35",
+      "order": 1
+    },
+    {
+      "group": "marital_status",
+      "label": "Solteiro",
+      "order": 1
+    },
+    {
+      "group": "children",
+      "label": "1",
+      "order": 1
+    },
+    {
+      "group": "contact_frequency",
+      "label": "1 vez",
+      "order": 1
+    },
+    {
+      "group": "approach_ease",
+      "label": "Não",
+      "order": 1
+    },
+    {
+      "group": "referral_potential",
+      "label": "Não",
+      "order": 1
+    },
+    {
+      "group": "source",
+      "label": "Recomendação",
+      "order": 1
+    },
+    {
+      "group": "income_band",
+      "label": "R$ 15 Mil a R$ 19 Mil",
+      "order": 2
+    },
+    {
+      "group": "age_range",
+      "label": "36 a 40",
+      "order": 2
+    },
+    {
+      "group": "marital_status",
+      "label": "União estável",
+      "order": 2
+    },
+    {
+      "group": "children",
+      "label": "2",
+      "order": 2
+    },
+    {
+      "group": "contact_frequency",
+      "label": "2 vezes",
+      "order": 2
+    },
+    {
+      "group": "source",
+      "label": "Eventos",
+      "order": 2
+    },
+    {
+      "group": "income_band",
+      "label": "R$ 20 Mil ou mais",
+      "order": 3
+    },
+    {
+      "group": "age_range",
+      "label": "41 a 45",
+      "order": 3
+    },
+    {
+      "group": "marital_status",
+      "label": "Divorciado",
+      "order": 3
+    },
+    {
+      "group": "children",
+      "label": "3",
+      "order": 3
+    },
+    {
+      "group": "contact_frequency",
+      "label": "3 vezes",
+      "order": 3
+    },
+    {
+      "group": "source",
+      "label": "Redes Sociais",
+      "order": 3
+    },
+    {
+      "group": "age_range",
+      "label": "46 a 50",
+      "order": 4
+    },
+    {
+      "group": "marital_status",
+      "label": "Viúvo",
+      "order": 4
+    },
+    {
+      "group": "children",
+      "label": "Mais que 3",
+      "order": 4
+    },
+    {
+      "group": "contact_frequency",
+      "label": "Mais que 3",
+      "order": 4
+    },
+    {
+      "group": "source",
+      "label": "Grupo/Meio Social",
+      "order": 4
+    },
+    {
+      "group": "age_range",
+      "label": "Acima de 50",
+      "order": 5
+    },
+    {
+      "group": "source",
+      "label": "Parceria",
+      "order": 5
+    }
+  ]
+}
