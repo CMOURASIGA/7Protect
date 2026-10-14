@@ -151,3 +151,7 @@ A V2-SPEC 05 foi aprovada no SHA `6f3ad36c72e6de7c9aa6cea9a37bf6323aa6802f`. Mud
 ### Checkpoint de implementação V2-SPEC 06
 
 A Metis Comercial responde a oito perguntas operacionais no Dashboard, na Agenda e no detalhe do HOT40, com explicação, referência ao fato, período em São Paulo e link para ação humana. A leitura é feita diretamente pelos repositories, sem reconciliação ou escrita; usa a projeção da Central e o único objeto de gargalo do Funil. As perguntas podem ser escolhidas ou digitadas em linguagem equivalente dentro do recorte suportado. A resposta é recalculada sob demanda e não fica armazenada. O primeiro recorte é determinístico e não ativa provider de IA pago. A Metis de planejamento do cliente permanece separada. A Human Validation da V2-SPEC 06 deve comparar as respostas com as telas canônicas e validar desktop e mobile antes de homologação.
+
+### V2-SPEC 07 — Importação, Demo e Estabilização
+
+Importação controlada de `.xlsm` em `/importacao`, com análise local, preview, revisão por linha, confirmação transacional, auditoria, relatório e rollback assistido. A importação usa `Contact` canônico e parâmetros do tenant; só `Mercado Base!M = Sim` pode solicitar entrada em HOT40 após qualificação válida. Datas sem identidade da aba HOT40 nunca criam atividades. Benchmarks de `Indicadores!D:H` são opt-in por ano/mês. A Demo permanece em banco de sessão isolado. Regras e roteiro em `docs/specs/V2_SPEC_07_SPREADSHEET_IMPORT_DEMO_STABILIZATION_PREPARATION.md` e `docs/specs/V2_SPEC_07_IMPLEMENTATION_VALIDATION.md`.

@@ -9,6 +9,10 @@ export async function listCommercialParameters() {
   await repository.initializeMatrix(tenant);
   return (await repository.list(tenant)).sort((a, b) => a.order - b.order || a.label.localeCompare(b.label, "pt-BR"));
 }
+export async function readCommercialParameters() {
+  const tenant = await tenantId();
+  return (await getRepositoryProvider().commercialParameters.list(tenant)).sort((a, b) => a.order - b.order || a.label.localeCompare(b.label, "pt-BR"));
+}
 export async function saveCommercialParameter(input: { id?: string; group: CommercialParameterGroup; label: string; order: number; active: boolean }) {
   const tenant = await tenantId(); const repository = getRepositoryProvider().commercialParameters;
   const current = input.id ? await repository.findById(input.id) : null;
