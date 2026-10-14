@@ -1,6 +1,6 @@
 # V2-SPEC 06 - Metis Comercial, preparação
 
-Status: AUTHORIZED FOR PREPARATION. Implementação ainda não autorizada. Branch: `v2/commercial-domain`. Base funcional homologada: `6f3ad36c72e6de7c9aa6cea9a37bf6323aa6802f` (V2-SPEC 05 APPROVED).
+Status: implementação autorizada, checkpoint pendente de Human Validation. Branch: `v2/commercial-domain`. Base funcional homologada: `6f3ad36c72e6de7c9aa6cea9a37bf6323aa6802f` (V2-SPEC 05 APPROVED).
 
 ## 1. Objetivo e fronteira
 
@@ -90,4 +90,10 @@ No ambiente demo, preparar agenda vencida, hoje e futura; HOT40 parado e sem aç
 
 ## 10. Gate
 
-Esta SPEC está autorizada somente para preparação documental. A implementação depende de aprovação explícita deste recorte e de decisão sobre histórico/retenção, política de custo e ativação do provider real. Não alterar `develop` ou `main`; não iniciar SPEC 07 V2.
+Gate da preparação, já cumprido pela autorização de implementação do usuário: a implementação depende de aprovação explícita deste recorte. Histórico persistido e provider real exigirão decisões próprias de retenção, custo e ativação antes de serem habilitados. Não alterar `develop` ou `main`; não iniciar SPEC 07 V2.
+
+## 11. Checkpoint de implementação autorizado
+
+O desenvolvimento foi autorizado após a preparação. Primeiro recorte: oito intents controladas, com botões e pergunta digitada equivalente. A resposta é construída pela projeção determinística de fatos e não depende de IA paga. Não há persistência de consultas nem migração de schema. `readCommercialMetisInput` lê repositories sem chamar `commercialOverview` ou `operationalOverview`, pois ambos podem reconciliar dados; `answerCommercialQuestion` usa `operationalAttention` puro. As perguntas não atualizam Notification, atividade, benchmark, Contact ou membership. A UI apresenta `asOf`, semana comercial, fontes e links existentes. HOT40 fornece `contactId` no drawer para a pergunta contextual. Perguntas fora do recorte recebem limite explícito.
+
+Human Validation do checkpoint: preparar o cenário da Agenda; consultar as oito perguntas, incluindo a contextual no detalhe de um Contact HOT40; comparar Hoje, Atrasadas, prioridade e parado com a Agenda/Central; comparar semana e meta zero com a Visão Semanal; comparar etapa, convertidos, denominador e conversão com o Funil. Tratar uma atividade, consultar novamente e confirmar atualização sem ação autônoma. Alterar o gargalo se possível e conferir a resposta atual; testar refresh, pergunta fora do escopo, desktop e mobile. Registrar `NOT TESTED` para cobertura não executada. O checkpoint permanece pendente de Human Validation e aprovação explícita, sem iniciar V2-SPEC 07.

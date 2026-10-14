@@ -146,4 +146,8 @@ Checkpoint corretivo da SPEC 05: a Central compara a produção do Dashboard com
 
 Correção final do gargalo: o Dashboard/Funil fornece etapa, origem, denominador, convertidos, conversão e período em um único resultado. No mês corrente sem filtros, a Central do Dashboard compartilha o mesmo snapshot e o reconciliador resolve notificações da etapa anterior quando o maior gargalo muda.
 
-A V2-SPEC 05 foi aprovada no SHA `6f3ad36c72e6de7c9aa6cea9a37bf6323aa6802f`. Mudança forçada de gargalo e mobile permanecem como cobertura humana não executada. A V2-SPEC 06, Metis Comercial, está autorizada somente para preparação documental em `docs/specs/V2_SPEC_06_METIS_COMMERCIAL_PREPARATION.md`; nenhuma implementação V2 da Metis foi iniciada.
+A V2-SPEC 05 foi aprovada no SHA `6f3ad36c72e6de7c9aa6cea9a37bf6323aa6802f`. Mudança forçada de gargalo e mobile permanecem como cobertura humana não executada. A preparação da V2-SPEC 06, Metis Comercial, está em `docs/specs/V2_SPEC_06_METIS_COMMERCIAL_PREPARATION.md`.
+
+### Checkpoint de implementação V2-SPEC 06
+
+A Metis Comercial responde a oito perguntas operacionais no Dashboard, na Agenda e no detalhe do HOT40, com explicação, referência ao fato, período em São Paulo e link para ação humana. A leitura é feita diretamente pelos repositories, sem reconciliação ou escrita; usa a projeção da Central e o único objeto de gargalo do Funil. As perguntas podem ser escolhidas ou digitadas em linguagem equivalente dentro do recorte suportado. A resposta é recalculada sob demanda e não fica armazenada. O primeiro recorte é determinístico e não ativa provider de IA pago. A Metis de planejamento do cliente permanece separada. A Human Validation da V2-SPEC 06 deve comparar as respostas com as telas canônicas e validar desktop e mobile antes de homologação.
