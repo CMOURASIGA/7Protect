@@ -28,7 +28,8 @@ export class CommercialDemoRepository {
         const a = activities.filter((row) => row.contactId === contact.id);
         const s = stages.filter((row) => row.contactId === contact.id);
         const cycle = cycles.filter((row) => row.contactId === contact.id);
-        const linked = opportunities.some((row) => row.contactId === contact.id) || referrals.some((row) => row.contactId === contact.id || row.referredContactId === contact.id) || imports.some((row) => row.contactId === contact.id);
+        const externalNotification = notifications.some((row) => row.contactId === contact.id && !((row.sourceType === "activity" && a.some((activity) => activity.id === row.sourceId && pristine(activity))) || (row.sourceType === "membership" && m.some((member) => member.id === row.sourceId && pristine(member)))));
+        const linked = opportunities.some((row) => row.contactId === contact.id) || referrals.some((row) => row.contactId === contact.id || row.referredContactId === contact.id) || imports.some((row) => row.contactId === contact.id) || externalNotification;
         const unowned = [...q, ...m, ...a, ...s].some((row) => !pristine(row));
         const unexpectedCycle = cycle.some((row) => !a.some((activity) => activity.id === row.activityId && pristine(activity)));
         if (!pristine(contact) || linked || unowned || unexpectedCycle) {
