@@ -28,6 +28,23 @@ export class ContactRepository extends IndexedDbRepository<Contact> {
 
 export class Hot40Repository extends IndexedDbRepository<Hot40Membership> {
   constructor(private db: ProtectDatabase) { super(db.hot40Memberships); }
+  convertToClient(contactId: string, tenantId: string) {
+    return this.db.transaction("rw", [this.db.contacts, this.db.hot40Memberships, this.db.hot40StageEvents], async () => {
+      const contact = await this.db.contacts.get(contactId);
+      if (!contact || contact.tenantId !== tenantId || contact.deletedAt) throw new Error("Contato não encontrado no contexto atual.");
+      if (contact.commercialStage === "client") return contact;
+      const memberships = await this.db.hot40Memberships.where("contactId").equals(contactId).toArray();
+      const current = memberships.filter((item) => item.tenantId === tenantId && live(item));
+      if (contact.commercialStage !== "hot40" || !current.length) throw new Error("Contato não está ativo no HOT40.");
+      const occurredAt = new Date().toISOString();
+      for (const member of current) await this.db.hot40Memberships.put({ ...member, status: "converted", updatedAt: occurredAt, version: member.version + 1 });
+      const primary = current.find((item) => item.status === "active") ?? current[0];
+      await this.db.hot40StageEvents.add({ ...timestamps(), tenantId, contactId, membershipId: primary.id, fromStage: primary.stage || "ab_phone", toStage: primary.stage || "ab_phone", occurredAt, eventType: "client_conversion", notes: "Contact convertido em Cliente" });
+      const result: Contact = { ...contact, commercialStage: "client", updatedAt: occurredAt, version: contact.version + 1 };
+      await this.db.contacts.put(result);
+      return result;
+    });
+  }
   // Non-destructive repair of inconsistent links created before the qualification guard.
   reconcileQualification(tenantId: string) {
     return this.db.transaction("rw", [this.db.contacts, this.db.prospectQualifications, this.db.hot40Memberships, this.db.hot40StageEvents], async () => {
@@ -36,7 +53,7 @@ export class Hot40Repository extends IndexedDbRepository<Hot40Membership> {
       const memberships = await this.db.hot40Memberships.where("tenantId").equals(tenantId).toArray();
       for (const contact of contacts.filter((item) => !item.deletedAt)) {
         if (qualifications.some((item) => item.contactId === contact.id && isValidQualification(item))) continue;
-        for (const membership of memberships.filter((item) => item.contactId === contact.id && !item.deletedAt && item.status !== "removed")) {
+        for (const membership of memberships.filter((item) => item.contactId === contact.id && !item.deletedAt && live(item))) {
           await this.db.hot40Memberships.put(revised({ ...membership, status: "removed" as const }));
         }
         if (contact.commercialStage === "hot40") await this.db.contacts.put(revised({ ...contact, commercialStage: "market_base" as const }));

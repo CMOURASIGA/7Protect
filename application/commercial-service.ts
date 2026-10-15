@@ -37,12 +37,7 @@ export async function promoteCommercialContact(contactId: string, commercialStag
   const tenantId = await currentTenant();
   const contact = await requireContact(contactId, tenantId);
   if (commercialStage === "hot40") assertHot40Qualified(contact, await provider().prospectQualifications.list(tenantId), tenantId);
-  if (commercialStage === "client") {
-    const memberships = await provider().hot40Memberships.list(tenantId);
-    for (const membership of memberships.filter((item) => item.contactId === contactId && ["active", "paused"].includes(item.status))) {
-      await provider().hot40Memberships.update({ ...membership, status: "converted" });
-    }
-  }
+  if (commercialStage === "client") return provider().hot40Memberships.convertToClient(contactId, tenantId);
   return provider().contacts.update({ ...contact, commercialStage });
 }
 export async function listQualifications() { const tenantId = await currentTenant(); return provider().prospectQualifications.list(tenantId); }

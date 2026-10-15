@@ -116,3 +116,42 @@ test("HOT40 movement preserves Contact and writes stage history atomically", asy
   assert.equal((await p.hot40StageEvents.list(person.tenantId)).length, 2);
   await assert.rejects(moveHot40Stage(person.id, "invalid" as "proposal"), /inválida/);
 });
+
+test("explicit client conversion preserves identity, activities and one timeline event across refreshes", async () => {
+  const person = await contact(); await qualifyFully(person.id); const member = await addToHot40(person.id);
+  const activity = await createCommercialActivity({ contactId: person.id, type: "ab_phone", status: "completed", completedAt: "2026-10-08T12:00:00Z" });
+  const p = getRepositoryProvider(); const originalEvents = (await p.hot40StageEvents.list(person.tenantId)).length;
+  const result = await promoteCommercialContact(person.id, "client");
+  assert.equal(result.id, person.id);
+  assert.equal(result.commercialStage, "client");
+  assert.equal((await p.hot40Memberships.findById(member.id))?.status, "converted");
+  assert.equal((await p.commercialActivities.findById(activity.id))?.contactId, person.id);
+  const events = await p.hot40StageEvents.list(person.tenantId);
+  assert.equal(events.length, originalEvents + 1);
+  assert.equal(events.filter((item) => item.eventType === "client_conversion").length, 1);
+  assert.equal(events.find((item) => item.eventType === "client_conversion")?.contactId, person.id);
+  const version = result.version;
+  await Promise.all([promoteCommercialContact(person.id, "client"), promoteCommercialContact(person.id, "client")]);
+  assert.equal((await p.contacts.findById(person.id))?.version, version);
+  assert.equal((await p.hot40StageEvents.list(person.tenantId)).length, originalEvents + 1);
+  const refreshed = await commercialOverview();
+  assert.equal(refreshed.contacts.filter((item) => item.id === person.id && item.commercialStage === "client").length, 1);
+  assert.equal(refreshed.memberships.filter((item) => item.contactId === person.id && item.status === "active").length, 0);
+  assert.equal(refreshed.memberships.find((item) => item.id === member.id)?.status, "converted");
+  assert.equal(refreshed.activities.find((item) => item.id === activity.id)?.contactId, person.id);
+  assert.equal(refreshed.stageEvents.find((item) => item.eventType === "client_conversion")?.contactId, person.id);
+});
+
+test("client conversion requires HOT40, isolates tenant and converts paused membership without duplicates", async () => {
+  const person = await contact(); const p = getRepositoryProvider();
+  await assert.rejects(promoteCommercialContact(person.id, "client"), /HOT40/);
+  await qualifyFully(person.id); const member = await addToHot40(person.id);
+  await p.hot40Memberships.update({ ...member, status: "paused" });
+  await assert.rejects(p.hot40Memberships.convertToClient(person.id, "another-tenant"), /contexto/);
+  assert.equal((await p.contacts.findById(person.id))?.commercialStage, "hot40");
+  const converted = await promoteCommercialContact(person.id, "client");
+  assert.equal(converted.id, person.id);
+  assert.equal((await p.hot40Memberships.findById(member.id))?.status, "converted");
+  assert.equal((await p.contacts.list(person.tenantId)).length, 1);
+  assert.equal((await p.hot40StageEvents.list(person.tenantId)).filter((item) => item.eventType === "client_conversion").length, 1);
+});
